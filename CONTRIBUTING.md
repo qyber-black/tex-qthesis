@@ -7,8 +7,8 @@ Thank you for your interest in contributing. This document explains how to contr
 
 ## Where the project lives
 
-- **Canonical repository:** The main repository is on **GitLab** at [qyber.black](https://qyber.black), in the **Tools** group. That is where the authoritative source is kept and where maintainers work.
-- **GitHub mirror:** The project is mirrored on **GitHub** for discoverability and so that people can contribute without a qyber.black account. Most contributors will use GitHub.
+- **Canonical repository:** The main repository is on **GitLab** at [https://qyber.black/tools/tex-qthesis](https://qyber.black/tools/tex-qthesis). That is where the authoritative source is kept and where maintainers work.
+- **GitHub mirror:** The project is mirrored on **GitHub** at [https://github.com/qyber-black/tex-qthesis](https://github.com/qyber-black/tex-qthesis) for discoverability and so that people can contribute without a qyber.black account. Most contributors will use GitHub. The mirror runs **GitLab → GitHub**: when maintainers push to GitLab, GitHub’s `main` is updated automatically. GitHub pull requests are closed (not shown as “Merged”) because the merge is done in the GitLab repo; maintainers will comment with the GitLab commit link when they integrate your change.
 
 You do **not** need an account on qyber.black to contribute. Use GitHub (or patches by email) as described below; maintainers will review and integrate accepted changes into the GitLab repo.
 
@@ -20,19 +20,19 @@ You do **not** need an account on qyber.black to contribute. Use GitHub (or patc
    Fork the project on **GitHub** (use the mirrored repo), then clone your fork:
 
    ```bash
-   git clone https://github.com/YOUR-USERNAME/qthesis.git
-   cd qthesis
+   git clone https://github.com/YOUR-USERNAME/tex-qthesis.git
+   cd tex-qthesis
    ```
 
    Add the upstream mirror as a remote so you can pull updates:
 
    ```bash
-   git remote add upstream https://github.com/ORIGINAL-OWNER/qthesis.git
+   git remote add upstream https://github.com/qyber-black/tex-qthesis.git
    ```
 
 2. **Create a branch**, make your changes, **build and test** (see “Build and test” below).
 
-3. **Open a pull request** on **GitHub** against the default branch. Describe what you changed and why. If there is an issue, link it.
+3. **Open a pull request** on **GitHub** against the **main** branch of [qyber-black/tex-qthesis](https://github.com/qyber-black/tex-qthesis). Describe what you changed and why. If there is an issue, link it. After review, a maintainer will integrate your changes into the GitLab repo and close the PR with a link to the merge commit.
 
 Maintainers will review pull requests on GitHub and, when accepted, bring the changes into the GitLab repo. Your contribution will be included in the canonical project.
 
@@ -49,6 +49,51 @@ Maintainers will consider the patch and, if accepted, apply it to the GitLab rep
 ### Option C: If you have a qyber.black (GitLab) account
 
 If you do have access to the GitLab instance: clone the canonical repo, create a branch, push it, and open a **merge request** on GitLab. That is the direct route into the main repository.
+
+## Maintainer workflow (integrating GitHub PRs)
+
+If you maintain the canonical repo on GitLab and need to integrate a pull request from GitHub:
+
+1. **Remotes**
+   Use a clone where **origin** points at GitLab ([https://qyber.black/tools/tex-qthesis](https://qyber.black/tools/tex-qthesis)). Add the GitHub mirror as a remote if you do not have it yet:
+
+   ```bash
+   git remote add github https://github.com/qyber-black/tex-qthesis.git
+   ```
+
+   (To integrate a specific PR you can instead add the contributor’s fork as a remote and fetch their branch.)
+
+2. **Fetch the PR**
+   Either fetch from the contributor’s fork:
+
+   ```bash
+   git fetch https://github.com/CONTRIBUTOR/tex-qthesis.git THEIR_BRANCH:pr-THEIR_BRANCH
+   ```
+
+   or, if your Git supports it, fetch the PR by number (replace `PR_NUMBER` with the pull request number):
+
+   ```bash
+   git fetch github pull/PR_NUMBER/head:pr-PR_NUMBER
+   ```
+
+3. **Merge and push**
+   On your local `main` branch:
+
+   ```bash
+   git merge pr-PR_NUMBER
+   ```
+
+   (or `pr-THEIR_BRANCH` if you fetched from the fork). Resolve any conflicts, run `make` and `make check`, then push to GitLab:
+
+   ```bash
+   git push origin main
+   ```
+
+4. **Mirror**
+   The existing GitLab → GitHub mirror will update GitHub’s `main`; no action needed.
+
+5. **Close the GitHub PR**
+   On GitHub, close the pull request (it will show as “Closed”, not “Merged”). Add a short comment, for example: “Merged into the canonical repo (GitLab): [link to commit on qyber.black].”
 
 ---
 
@@ -91,4 +136,4 @@ Keep existing copyright notices; new lines can be added for new contributors.
 
 ## Questions
 
-If something is unclear, open an issue on **GitHub** (mirror repo) so that anyone can participate. If you have access to qyber.black, you can instead use the GitLab project in the Tools group. For the exact repository URLs, see the project’s GitHub or GitLab page.
+If something is unclear, open an issue on **GitHub** (mirror repo) so that anyone can participate. If you have access to qyber.black, you can instead use the GitLab project in the Tools group. Repository URLs: [GitHub](https://github.com/qyber-black/tex-qthesis), [GitLab](https://qyber.black/tools/tex-qthesis).
