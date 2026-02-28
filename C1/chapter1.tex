@@ -1,0 +1,170 @@
+% =============================================================================
+% CHAPTER 1: Introduction (thesis template + feature demonstration)
+% =============================================================================
+% SPDX-FileCopyrightText: 2026 Frank Langbein <frank@langbein.org>
+% SPDX-License-Identifier: LPPL-1.3c
+%
+% This chapter is structured as a typical thesis introduction: motivation,
+% research questions, contributions, and thesis roadmap. Replace each section
+% with your own content. It also demonstrates packages and class features
+% (citations, figures, tables, etc.); see comments and Section~\ref{sec:ch1-reference}.
+% Document-level conventions (citations, formatting, %ID comments) are in main.tex.
+% =============================================================================
+
+% -----------------------------------------------------------------------------
+% Chapter intro (no section): one short paragraph before the first \section
+% -----------------------------------------------------------------------------
+This chapter introduces the thesis. It outlines the motivation and context for the work, the research questions and objectives, the main contributions, and the structure of the remaining chapters. The following sections expand on each of these.
+
+% -----------------------------------------------------------------------------
+% Motivation and context (typical first section)
+% -----------------------------------------------------------------------------
+% Use \section, \subsection, \label{key}. Refer with \ref{key} or \autoref{key}.
+
+\section{Motivation and context}\label{sec:motivation}
+
+This template illustrates the structure and style of a \gls{phd} thesis using the Qyber thesis class. As in a real introduction, you would state the problem domain, why it matters, and how your work fits. Acronyms use the long-short style: first use gives the full form (e.g.\@ \gls{uk}); later use \acrshort{phd} or \acrlong{phd} when you need only short or long.
+
+As shown in previous work~\citep{example-paper}, we follow standard practice.
+%F Clarify whether this applies to all cases.
+\citet{example-book} provide a longer treatment; multiple citations: \citep{example-paper,example-conf}. You can link to other chapters (e.g.\@ Chapter~\ref{ch2}, Section~\ref{sec:objectives}) and to figures (Fig.~\ref{fig:demo}). The class provides \url{https://example.com} and \href{https://example.com}{link text} for URLs and hyperlinks.
+%S Consider adding a reference here.
+
+% -----------------------------------------------------------------------------
+% Research questions and objectives (typical second section)
+% -----------------------------------------------------------------------------
+% Use \citep{} (parenthetical) or \citet{} (narrative), not \cite.
+
+\section{Research questions and objectives}\label{sec:objectives}
+
+State your main research question and break it down into objectives. The following is a placeholder list (enumitem package: custom labels).
+
+\begin{enumerate}[label=\textbf{O\arabic*:}, leftmargin=*]
+  \item First objective: replace with your own.
+  \item Second objective.
+  \item Third objective.
+\end{enumerate}
+
+When you need mathematics, use amsmath and mathtools. Example:
+\begin{equation}\label{eq:example}
+  E = mc^2, \qquad \int_0^1 f(x)\,\mathrm{d}x = F(1) - F(0).
+\end{equation}
+Refer as Equation~\eqref{eq:example}; inline math: $\alpha + \beta = \gamma$. Paired delimiters (mathtools): \DeclarePairedDelimiter{\abs}{\lvert}{\rvert} then $\abs{x}$, $\abs*{\frac{1}{2}}$. Chemistry (mhchem): \ce{H2O}, \ce{CO2}, \ce{^1H-NMR}. Units (siunitx): \SI{3.0}{m/s}, \num{1234} samples. Symbols: \textdegree, \textcopyright; dingbats (pifont): \ding{51} \ding{43}. Relative size (relsize): \textlarger{larger} \textsmaller{smaller}.
+
+% -----------------------------------------------------------------------------
+% Contributions (typical third section)
+% -----------------------------------------------------------------------------
+
+\section{Contributions}\label{sec:contributions}
+
+Summarise the main contributions of the thesis. You can use a short list and refer to a figure or table.
+
+\begin{itemize}
+  \item First contribution; replace with your own.
+  \item Second contribution.
+\end{itemize}
+
+Figure~\ref{fig:demo} shows how to include a figure (graphicx, caption; optional short caption for the List of Figures). Float placement: \texttt{[t]} = top of page (default here); \texttt{[htbp]} = here, top, bottom, float page; \texttt{[!t]} = relax limits and prefer top. See the ``Float placement'' comment block in \texttt{main.tex}. Use \texttt{[H]} (float package) only when you must force ``here'' (can cause uneven spacing). Subfigures (subcaption): see Figure~\ref{fig:sub}.
+
+\begin{figure}[t]
+  \centering
+  \fbox{\rule{0pt}{4cm}\rule{4cm}{0pt}}
+  \caption[Short for list of figures]{Full caption. Optional argument used in List of Figures.}\label{fig:demo}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[t]{0.45\linewidth}
+    \centering
+    \fbox{\rule{0pt}{2cm}\rule{2cm}{0pt}}
+    \subcaption{First subfigure.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.45\linewidth}
+    \centering
+    \fbox{\rule{0pt}{2cm}\rule{2cm}{0pt}}
+    \subcaption{Second subfigure.}
+  \end{subfigure}
+  \caption{Example with subcaption (a) and (b).}
+  \label{fig:sub}
+\end{figure}
+
+Tables: tabularray (default) with \texttt{tblr}, or longtable for multi-page tables (Table~\ref{tab:long}). Same placement options as figures (\texttt{[t]}, \texttt{[!t]}, \texttt{[htbp]}, etc.).
+
+\begin{table}[t]
+  \centering
+  \caption{Example table (tabularray).}
+  \label{tab:demo}
+  \begin{tblr}{colspec={lcc}, hlines}
+    Item   & Value A & Value B \\
+    First  & 1.0     & 2.0    \\
+    Second & 3.0     & 4.0    \\
+  \end{tblr}
+\end{table}
+
+\begin{center}
+  \begin{longtable}{lcc}
+    \caption{Minimal longtable demo (not in a float environment).} \label{tab:long} \\
+    \hline
+    Item   & A & B \\ \hline
+    \endfirsthead
+    \hline
+    Item   & A & B \\ \hline
+    \endhead
+    Row 1  & 1 & 2 \\
+    Row 2  & 3 & 4 \\ \hline
+  \end{longtable}
+\end{center}
+
+% Alternative (traditional): \usepackage{booktabs} then \toprule, \midrule, \bottomrule.
+
+% -----------------------------------------------------------------------------
+% Thesis structure / roadmap (typical final section of introduction)
+% -----------------------------------------------------------------------------
+
+\section{Thesis structure}\label{sec:roadmap}
+
+Outline how the rest of the thesis is organised so the reader knows what to expect. Reference chapters by label.
+
+\begin{itemize}
+  \item \textbf{Chapter~\ref{ch2}} (Literature Review): surveys prior work and identifies the gap.
+  \item \textbf{Chapter~\ref{ch3}} (Methods): describes design and procedure.
+  \item \textbf{Chapter~\ref{ch4}} (Results): presents main findings.
+  \item \textbf{Chapter~\ref{ch5}} (Discussion): interpretation and limitations.
+  \item \textbf{Chapter~\ref{ch6}} (Further Analysis): extended or supplementary results.
+  \item \textbf{Chapter~\ref{ch7}} (Conclusions): answers to research questions and future work.
+  \item \textbf{Appendix~\ref{app:supp}}: supplementary material (tables, derivations, notation).
+\end{itemize}
+
+Algorithms (algorithm, algpseudocode) appear in the List of Algorithms (Algorithm~\ref{alg:demo}). Use \texttt{[t]} or \texttt{[!t]} for top placement like figures/tables. For code snippets use verbatim; for wide tables or figures use \texttt{\string
+\begin{sidewaystable}} or \texttt{\string
+  \begin{sidewaysfigure}} (rotating).\footnote{Footnote example. Captions and footnotes are set at least 11\,pt by the class.} Placeholder prose in other chapters uses \texttt{\string\lipsum[n]}. Example: \lipsum[1]
+    Use \texttt{\string\afterpage\{\string\clearpage\}} (afterpage) when you need to clear after the current page.
+
+    \begin{algorithm}[t]
+      \caption{Example algorithm (algpseudocode). Alternative: algorithmic for traditional layout.}
+      \label{alg:demo}
+      \begin{algorithmic}[1]
+        \State \textbf{Input:} data $x$
+        \State \textbf{Output:} result $y$
+        \State $y \gets 0$
+        \For{$i = 1$ \textbf{to} $n$}
+        \State $y \gets y + x_i$
+        \EndFor
+        \State \Return $y$
+      \end{algorithmic}
+    \end{algorithm}
+
+    Short code (verbatim):
+\begin{verbatim}
+  x = 1
+  y = x + 1
+\end{verbatim}
+
+    % -----------------------------------------------------------------------------
+    % Template reference (for authors: where to find package demos and conventions)
+    % -----------------------------------------------------------------------------
+
+    \section{Template reference}\label{sec:ch1-reference}
+
+    This introduction doubles as a template: the sections above (Motivation, Research questions, Contributions, Thesis structure) are the usual structure for a thesis Chapter~1. Replace their content with your own. The same file also demonstrates: \verb|\citep|/\verb|\citet| (natbib), glossaries (long-short acronyms), amsmath/mathtools, textcomp, pifont, siunitx, relsize, mhchem, enumitem, graphicx/caption, float/stfloats, subcaption, tabularray/longtable, algorithm/algpseudocode, verbatim, afterpage, lipsum, rotating, footnotes. Conventions for citations, spaces (\verb|~|, \verb|\@|), dashes, and reviewer comments (\verb|%ID |) are in the comment block at the top of \texttt{main.tex}.

@@ -1,0 +1,281 @@
+% =============================================================================
+% Template thesis using the qthesis class
+% =============================================================================
+% This file is the main entry point. Build: make (uses latexmk; see Makefile).
+% To use another engine: make ENGINE=xelatex or make ENGINE=lualatex.
+%
+% SPDX-FileCopyrightText: 2026 Frank Langbein <frank@langbein.org>
+% SPDX-License-Identifier: LPPL-1.3c
+% SPDX-License-Identifier: CC-BY-SA-4.0
+%
+% This template and other .tex/.bib files in this directory are part of the
+% same work and may be distributed and/or modified under the LaTeX Project
+% Public License (LPPL), version 1.3c. See LICENSE file.
+%
+% -----------------------------------------------------------------------------
+% Overview (qthesis class)
+% -----------------------------------------------------------------------------
+% The class is a wrapper around the standard book class. Layout: A4, 12pt,
+% 3cm margins; 1.5 line spacing; ragged-right; main text 12pt, footnotes and
+% captions at least 11pt; preliminary pages in roman numerals, then Arabic
+% for main matter. Chapter style: top bar in header, ``Chapter N'' or
+% ``Appendix A'' in header; number/letter and title on first line of chapter.
+%
+% -----------------------------------------------------------------------------
+% Class options
+% -----------------------------------------------------------------------------
+% Font: mixed (default) = sans text + serif math; sans = all sans-serif;
+%   serif = serif text and math.
+% Layout: oneside (default) or twoside.
+% Citation: numeric (default) = plainnat, [1], [1,2]; harvard = agsm, (Author, 2000).
+% Other options are passed to the underlying book class.
+% Engine: pdfTeX vs XeLaTeX/LuaLaTeX is detected for font setup.
+%
+% -----------------------------------------------------------------------------
+% Metadata and title page
+% -----------------------------------------------------------------------------
+% \title, \author, \degree, \university, \date drive the generated title page
+% (bold title, name, degree, university, month/year).
+%
+% -----------------------------------------------------------------------------
+% License and copyright (SPDX)
+% -----------------------------------------------------------------------------
+% \copyrightholder defaults to \author; \licenseyear defaults to current year.
+% When \license is set: (1) a copyright page is inserted after the abstract;
+% (2) a License chapter is inserted just before the bibliography.
+% If qthesis-licenses.tex is present, the class loads it and can show full
+% license text for supported SPDX IDs; otherwise name + URL only.
+% Supported SPDX IDs include: MIT, Apache-2.0, BSD-2/3-Clause, GPL/AGPL/GFDL,
+% LPPL-1.3c, CC-*, CC0-1.0. Any SPDX id accepted; unlisted -> spdx.org.
+%
+% -----------------------------------------------------------------------------
+% Front matter
+% -----------------------------------------------------------------------------
+% \maketitle{...} produces: title page; then (if \license set) copyright page;
+% then abstract; then frontlists: TOC, LOF, LOT, LOA, List of Acronyms.
+% For unnumbered chapters (Dedication, Acknowledgements, Declaration, Publications,
+% data and code, etc.) use \chapter*{Title} and \addcontentsline{toc}{chapter}{Title}
+% so they appear in TOC.
+%
+% -----------------------------------------------------------------------------
+% Chapters and back matter
+% -----------------------------------------------------------------------------
+% \mainmatter starts Arabic page numbering. Put \backmatter before \bib.
+% \bib{basename} runs bibliography (and inserts License chapter if \license set).
+% Appendices: \appendix then \chapter for each; lettered A, B, ... in headers/TOC.
+% Natbib: numeric -> plainnat; harvard -> agsm.
+%
+% -----------------------------------------------------------------------------
+% LaTeX formatting (citations, spaces, dashes, quotes)
+% -----------------------------------------------------------------------------
+% Citations (natbib): prefer \citep and \citet over bare \cite (class may warn).
+%   \citep{key}  = parenthetical: ``(Author, 2020)'' or ``[1]''. Use when the citation
+%     is a clause or in parentheses: ``as shown~\citep{key}'' or ``(e.g.\@ \citep{key})''.
+%   \citet{key}  = narrative: ``Author (2020)'' or ``Author [1]''. Use when the author
+%     is part of the sentence. If the sentence *starts* with the citation, write
+%     ``\citet{key} showed that...'' (no ~ before \citet at sentence start). If the
+%     citation follows a word, use a non-breaking space: ``Smith~\citet{key} argued...''.
+%   Non-breaking space (~): put ~ before \citep or \citet when they follow a word so
+%     the citation does not line-break to the next line; omit ~ at sentence start.
+% Spaces: \@ after abbreviation before period (e.g.\@ something); ~ non-breaking
+%   (Fig.~1, Section~2.1); \, thin space (numbers, number+unit); "\ " normal
+%   stretchable space; \nobreakspace or ~ to avoid line break.
+% Dashes: -- en-dash (ranges, compound adjectives); --- em-dash (parenthetical).
+% Ellipsis: \ldots. Quotes: use `` and '' (or csquotes) for typographic quotes.
+%
+% -----------------------------------------------------------------------------
+% Float placement (figures, tables, algorithms)
+% -----------------------------------------------------------------------------
+% Use the optional argument: \begin{figure}[placement] ... \end{figure}. Same for
+% table, algorithm. Placement letters (LaTeX tries in order): h = here (approx),
+% t = top of page, b = bottom of page, p = separate page of floats. Order matters:
+%   [htbp]  try here, then top, then bottom, then float page (common default).
+%   [t]     top only; good when you prefer figures/tables at page top.
+%   [thbp]  prefer top, then here, bottom, float page.
+% Prefix ! relaxes LaTeX's limits (e.g. allow more floats per page): use [!t],
+% [!htbp] when you want stronger preference (e.g. \begin{figure}[!t] for ``try
+% hard to put at top''). The float package adds [H] = ``here definitely'' (figure
+% is not floated; use sparingly as it can cause uneven spacing).
+% The class (qthesis.cls) relaxes float placement parameters so more floats fit
+% on each page and full float pages are easier; floats tend to stay closer to
+% their first reference in the text.
+%
+% -----------------------------------------------------------------------------
+% Reviewer comments: convention ``%ID ''
+% -----------------------------------------------------------------------------
+% Format: %ID (e.g. %F for Frank) at start of line; space after ID required (grep-friendly).
+% Purpose: comments from a person (ID): suggestions, questions on the *preceding* text.
+% Placement: immediately after the sentence/element, on a new line (no break in paragraph).
+% Find all: grep -r '^%[A-Za-z] ' *.tex */*.tex
+% Lifecycle: when addressed, delete the comment; do not keep ``for checking''.
+%
+% -----------------------------------------------------------------------------
+% Version control (git)
+% -----------------------------------------------------------------------------
+% Track sources (.tex, .bib, .cls, etc.) with git or another VCS.
+% Ignore build products (see .gitignore in this directory for extensions).
+% Use branches for major edits or chapter drafts; tag milestones (e.g. draft-v1, submission).
+% Do not commit personal data or secrets; keep author, university, paths appropriate.
+%
+% -----------------------------------------------------------------------------
+% Writing and project: Keep chapters focused (intro: motivation, questions, contributions,
+% roadmap; literature: survey and gap; methods: reproducible; results/discussion/conclusions).
+% Use \ref and \citep/\citet; label chapters/sections/figures; split into per-chapter .tex
+% files; use version control and tag milestones; automate with make (or latexmk).
+%
+% -----------------------------------------------------------------------------
+% Word count: run ``make wordcount'' (texcount -inc; per-file and total with caption
+% words shown separately so you can apply institution rules if needed).
+% =============================================================================
+\documentclass[mixed,oneside,numeric]{qthesis}
+
+% -----------------------------------------------------------------------------
+% Optional: use a different acronyms file
+% -----------------------------------------------------------------------------
+%\renewcommand{\qthesisacronymfile}{my-acronyms.tex}
+
+% -----------------------------------------------------------------------------
+% Useful packages for thesis writing
+% -----------------------------------------------------------------------------
+
+% Tables
+\usepackage{tabularray}      % Flexible column types, rules, longtblr for multi-page tables
+% Alternative (traditional): \usepackage{booktabs}  % \toprule, \midrule, \bottomrule
+\usepackage{longtable}       % Tables that span multiple pages (or use tabularray longtblr)
+%\usepackage{multirow}        % Span multiple rows in tables
+%\usepackage{multicol}        % Multiple columns in text/tables
+%\usepackage{colortbl}        % Coloured rows/cells in tables
+
+% Math, symbols, related
+\usepackage{mathtools}       % Extensions to amsmath (matrix envs, \DeclarePairedDelimiter)
+\usepackage{pifont}          % Dingbat symbols, e.g. \ding{51}, \ding{43}
+\usepackage{siunitx}         % Units and numbers: \SI{3}{m/s}, \num{1000}
+
+% Floats
+\usepackage{float}           % [H] = here definitely; see ``Float placement'' comment block above
+\usepackage{stfloats}        % Improved placement for bottom floats
+\usepackage{subcaption}      % Subfigures with (a), (b) and per-subfigure captions
+\usepackage{rotating}        % \begin{sidewaystable}, \begin{sidewaysfigure} for wide content
+
+% Algorithms
+\usepackage{algorithm}       % Numbered algorithm floats and List of Algorithms (default)
+\usepackage[noend]{algpseudocode} % Algorithmicx pseudocode environment
+% Alternative: \usepackage{algorithmic}  % Traditional algorithm layout, different command set
+% Alternative: \usepackage[ruled,vlined]{algorithm2e}  % Different syntax and layout
+
+% Other useful packages
+\usepackage{lipsum}            % Placeholder text: \lipsum[n], \lipsum[1-5], etc.
+\usepackage{enumitem}          % Customise list labels, spacing (e.g. [label=O\arabic*])
+\usepackage{relsize}           % \textlarger, \textsmaller for relative font sizing
+\usepackage[version=4]{mhchem} % Chemical formulae: \ce{H2O}, \ce{CO2}, \ce{^1H-NMR}
+\usepackage{verbatim}          % \begin{verbatim} ... \end{verbatim} for code
+\usepackage{afterpage}         % \afterpage{\clearpage} to clear after current page
+
+% -----------------------------------------------------------------------------
+% Thesis metadata
+% -----------------------------------------------------------------------------
+\title{Template Thesis Title: Each Word Capitalised}
+\author{Your Full Name}
+\degree{Doctor of Philosophy}
+\university{Your University}
+\date{February 2026}
+
+% License and copyright following SPDX. (optional; comment out if not needed).
+% Needs qthesis-licenses.tex for license text in the License chapter.
+\license{CC-BY-SA-4.0}
+\copyrightholder{Your Full Name}
+\licenseyear{2026}
+
+\begin{document}
+
+\frontmatter
+
+% \maketitle{...} produces: title page, (copyright page if \license set), abstract,
+% then frontlists: TOC, List of Figures, List of Tables, List of Algorithms,
+% List of Acronyms (if acronyms.tex defines \newacronym).
+\maketitle{%
+  This is the abstract: a short, self-contained summary of the thesis (maximum
+  300 words). It should state the problem, methods, and main contributions
+  so that a reader can understand the scope without reading the full document.
+  The \texttt{qthesis} class typesets it as an unnumbered chapter and adds it to
+  the table of contents.
+}
+
+% -----------------------------------------------------------------------------
+% Optional front-matter chapters (unnumbered).
+% -----------------------------------------------------------------------------
+
+\chapter{Dedication}
+% Replace with your dedication (one or two lines).
+To my family.
+
+\chapter{Acknowledgements}
+% Replace with your acknowledgements. Here you can also acknowledge any contributions from other
+% parties to the work.
+I thank my supervisors and colleagues for their support.
+
+%\chapter{Declaration}
+% Replace with your declaration (e.g. that the work is your own, and any
+% required statements on collaboration, publications, or word count).
+% Often this is submitted in separate forms and does not have to be here.
+%This thesis is the result of my own work. Where reference is made to other work, this is indicated in the text.
+
+\chapter{Publications, data and code}
+% List publications and state where data and code produced for this thesis are available.
+% Replace with your own entries; you can use \citep{key} for publications.
+
+\section{Publications}
+% Papers (and optionally other outputs) that form part of or arise from this thesis.
+% These can also be discussed in the introduction (what has been published or is planned).
+\begin{enumerate}
+  \item Author. Title. \textit{Journal}, volume, pages, year.~\citep{example-paper}
+\end{enumerate}
+
+\section{Data}
+% Datasets produced in this thesis and where they are available (repository, DOI, or ``on request'').
+Data supporting this thesis are available from [repository/DOI or ``available on request'']. Replace with your statement.
+
+\section{Code}
+% Software or code produced in this thesis and where it is available (repository, DOI, etc.).
+Code produced for this thesis is available from [repository/DOI or ``available on request'']. Replace with your statement.
+
+\mainmatter
+
+% -----------------------------------------------------------------------------
+% Main chapters: one per folder C1--C7, each with chapterN.tex
+% -----------------------------------------------------------------------------
+\chapter{Introduction}\label{ch1}
+\input{C1/chapter1}
+
+\chapter{Literature Review}\label{ch2}
+\input{C2/chapter2}
+
+\chapter{Methods}\label{ch3}
+\input{C3/chapter3}
+
+\chapter{Results}\label{ch4}
+\input{C4/chapter4}
+
+\chapter{Discussion}\label{ch5}
+\input{C5/chapter5}
+
+\chapter{Further Analysis}\label{ch6}
+\input{C6/chapter6}
+
+\chapter{Conclusions and Future Work}\label{ch7}
+\input{C7/chapter7}
+
+\backmatter
+
+% -----------------------------------------------------------------------------
+% Appendices (lettered A, B, ... in headers and TOC)
+% -----------------------------------------------------------------------------
+\appendix
+\chapter{Supplementary Material}\label{app:supp}
+\input{Appendix/appendix}
+
+% Bibliography (always last): \bib{bibfile} uses natbib (numeric or harvard per class option)
+% and inserts the License chapter if \license was set.
+\bib{bibliography}
+
+\end{document}
