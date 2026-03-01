@@ -23,7 +23,7 @@ This chapter introduces the thesis. It outlines the motivation and context for t
 
 \section{Motivation and context}\label{sec:motivation}
 
-This template illustrates the structure and style of a \gls{phd} thesis using the Qyber thesis class. As in a real introduction, you would state the problem domain, why it matters, and how your work fits. Acronyms use the long-short style: first use gives the full form (e.g.\@ \gls{uk}); later use \acrshort{phd} or \acrlong{phd} when you need only short or long.
+\newthought{This template illustrates} the structure and style of a \gls{phd} thesis using the Qyber thesis class. As in a real introduction, you would state the problem domain, why it matters, and how your work fits. Acronyms use the long-short style: first use gives the full form (e.g.\@ \gls{uk}); later use \acrshort{phd} or \acrlong{phd} when you need only short or long.
 
 As shown in previous work~\citep{example-paper}, we follow standard practice.
 %F Clarify whether this applies to all cases.
@@ -57,14 +57,31 @@ Refer as Equation~\eqref{eq:example}; inline math: $\alpha + \beta = \gamma$. Pa
 
 \section{Contributions}\label{sec:contributions}
 
-Summarise the main contributions of the thesis. You can use a short list and refer to a figure or table.
+\epigraph{The best way to predict the future is to invent it.}{Alan Kay}
+
+Summarise the main contributions of the thesis. You can use a short list and refer to a figure or table. The class provides restyled \texttt{quote} and \texttt{quotation} environments (smaller type, indents):
+
+\begin{quotation}
+  A short quotation: replace with a real citation or excerpt. Use \verb|\begin{quotation}...\end{quotation}| for indented, smaller text. For a shorter block use \verb|\begin{quote}...\end{quote}|.
+\end{quotation}
+
+\begin{quote}
+  A single-line quote: \verb|\begin{quote}...\end{quote}| gives a shorter block with smaller type (class restyle).
+\end{quote}
+
+The class also restyles \verb|\begin{verse}...\end{verse}| for short verse or poetry (centred lines, smaller type):
+\begin{verse}
+  Line one.\\
+  Line two.\\
+  Line three.
+\end{verse}
 
 \begin{itemize}
   \item First contribution; replace with your own.
   \item Second contribution.
 \end{itemize}
 
-Figure~\ref{fig:demo} shows how to include a figure (graphicx, caption; optional short caption for the List of Figures). Float placement: \texttt{[t]} = top of page (default here); \texttt{[htbp]} = here, top, bottom, float page; \texttt{[!t]} = relax limits and prefer top. See the ``Float placement'' comment block in \texttt{main.tex}. Use \texttt{[H]} (float package) only when you must force ``here'' (can cause uneven spacing). Subfigures (subcaption): see Figure~\ref{fig:sub}.
+Figure~\ref{fig:demo} shows how to include a figure (graphicx, caption; optional short caption for the List of Figures). Float placement: \texttt{[t]} = top of page (default here); \texttt{[htbp]} = here, top, bottom, float page; \texttt{[!t]} = relax limits and prefer top. See the ``Float placement'' comment block in \texttt{main.tex}. Use \texttt{[H]} (float package) only when you must force ``here'' (can cause uneven spacing). Subfigures (subcaption): see Figure~\ref{fig:sub}. Full-width figure (when class option \texttt{fullwidth} is set): Figure~\ref{fig:fullwidth}.
 
 \begin{figure}[t]
   \centering
@@ -89,7 +106,34 @@ Figure~\ref{fig:demo} shows how to include a figure (graphicx, caption; optional
   \label{fig:sub}
 \end{figure}
 
-Tables: tabularray (default) with \texttt{tblr}, or longtable for multi-page tables (Table~\ref{tab:long}). Same placement options as figures (\texttt{[t]}, \texttt{[!t]}, \texttt{[htbp]}, etc.).
+% Full-width figure: requires class option \texttt{fullwidth}. If you remove that option, comment out this block.
+\begin{fullwidthfigure}[t]
+  \fbox{\rule{0pt}{2.5cm}\rule{\linewidth}{0pt}}
+  \caption[Full-width figure]{Full-width figure example. Use \texttt{\string
+    \begin{fullwidthfigure}[t]}...\texttt{\string
+  \end{fullwidthfigure}} when the class option \texttt{fullwidth} is set.}\label{fig:fullwidth}
+\end{fullwidthfigure}
+
+% Full-width block (not a float): extends into margin. Requires class option \texttt{fullwidth}; comment out if not set.
+\begin{fullwidth}
+  This paragraph is in \verb|\begin{fullwidth}...\end{fullwidth}|: block content that extends into the left and right margins (e.g.\@ for wide tables or key points).
+\end{fullwidth}
+
+Tables: use \texttt{booktabs} (\verb|\toprule|, \verb|\midrule|, \verb|\bottomrule|; Table~\ref{tab:booktabs}), or \texttt{tabularray} with \texttt{tblr} / \texttt{longtable} for flexible or multi-page tables (Table~\ref{tab:demo}, Table~\ref{tab:long}). Same placement options as figures (\texttt{[t]}, \texttt{[!t]}, \texttt{[htbp]}, etc.).
+
+\begin{table}[t]
+  \centering
+  \caption{Example table (booktabs).}
+  \label{tab:booktabs}
+  \begin{tabular}{lcc}
+    \toprule
+    Item   & Value A & Value B \\
+    \midrule
+    First  & 1.0     & 2.0    \\
+    Second & 3.0     & 4.0    \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \begin{table}[t]
   \centering
@@ -105,18 +149,16 @@ Tables: tabularray (default) with \texttt{tblr}, or longtable for multi-page tab
 \begin{center}
   \begin{longtable}{lcc}
     \caption{Minimal longtable demo (not in a float environment).} \label{tab:long} \\
-    \hline
-    Item   & A & B \\ \hline
+    \toprule
+    Item   & A & B \\ \midrule
     \endfirsthead
-    \hline
-    Item   & A & B \\ \hline
+    \toprule
+    Item   & A & B \\ \midrule
     \endhead
     Row 1  & 1 & 2 \\
-    Row 2  & 3 & 4 \\ \hline
+    Row 2  & 3 & 4 \\ \bottomrule
   \end{longtable}
 \end{center}
-
-% Alternative (traditional): \usepackage{booktabs} then \toprule, \midrule, \bottomrule.
 
 % -----------------------------------------------------------------------------
 % Thesis structure / roadmap (typical final section of introduction)
@@ -125,6 +167,10 @@ Tables: tabularray (default) with \texttt{tblr}, or longtable for multi-page tab
 \section{Thesis structure}\label{sec:roadmap}
 
 Outline how the rest of the thesis is organised so the reader knows what to expect. Reference chapters by label.
+
+\subsection{Reading order}\label{sec:roadmap-order}
+
+Chapters are intended to be read in sequence; the appendix can be consulted as needed. This subsection illustrates \verb|\subsection| (and optional italic style with class option \texttt{italic}).
 
 \begin{itemize}
   \item \textbf{Chapter~\ref{ch2}} (Literature Review): surveys prior work and identifies the gap.
@@ -139,6 +185,7 @@ Outline how the rest of the thesis is organised so the reader knows what to expe
 Algorithms (algorithm, algpseudocode) appear in the List of Algorithms (Algorithm~\ref{alg:demo}). Use \texttt{[t]} or \texttt{[!t]} for top placement like figures/tables. For code snippets use verbatim; for wide tables or figures use \texttt{\string
 \begin{sidewaystable}} or \texttt{\string
   \begin{sidewaysfigure}} (rotating).\footnote{Footnote example. Captions and footnotes are set at least 11\,pt by the class.} Placeholder prose in other chapters uses \texttt{\string\lipsum[n]}. Example: \lipsum[1]
+
     Use \texttt{\string\afterpage\{\string\clearpage\}} (afterpage) when you need to clear after the current page.
 
     \begin{algorithm}[t]
@@ -167,4 +214,15 @@ Algorithms (algorithm, algpseudocode) appear in the List of Algorithms (Algorith
 
     \section{Template reference}\label{sec:ch1-reference}
 
-    This introduction doubles as a template: the sections above (Motivation, Research questions, Contributions, Thesis structure) are the usual structure for a thesis Chapter~1. Replace their content with your own. The same file also demonstrates: \verb|\citep|/\verb|\citet| (natbib), glossaries (long-short acronyms), amsmath/mathtools, textcomp, pifont, siunitx, relsize, mhchem, enumitem, graphicx/caption, float/stfloats, subcaption, tabularray/longtable, algorithm/algpseudocode, verbatim, afterpage, lipsum, rotating, footnotes. Conventions for citations, spaces (\verb|~|, \verb|\@|), dashes, and reviewer comments (\verb|%ID |) are in the comment block at the top of \texttt{main.tex}.
+    This introduction doubles as a template: the sections above (Motivation, Research questions, Contributions, Thesis structure) are the usual structure for a thesis Chapter~1. Replace their content with your own. The same file also demonstrates:
+
+    \begin{itemize}
+        \item \textbf{Citations and links:} \verb|\citep|/\verb|\citet| (natbib); link colour DarkBlue, cite/URL colour DarkGreen (class default).
+      \item \textbf{\texttt{\string\newthought}:} Section-opening phrase in small caps with vertical space (e.g.\@ in Motivation). Letterspacing is applied by default.
+        \item \textbf{Quote environments:} \verb|\begin{quotation}| \verb|...| \verb|\end{quotation}|, \verb|\begin{quote}| \verb|...| \verb|\end{quote}|, and \verb|\begin{verse}| \verb|...| \verb|\end{verse}| are restyled (smaller type, indents; verse centred) by the class.
+        \item \textbf{Full-width content:} With class option \texttt{fullwidth}, use \verb|\begin{fullwidth}| \verb|...| \verb|\end{fullwidth}| for block content that extends into the margin, and \texttt{fullwidthfigure}/\texttt{fullwidthtable} for full-width floats (e.g.\@ Figure~\ref{fig:fullwidth}).
+        \item \textbf{Epigraph:} \verb|\epigraph{quote}{source}| for chapter- or section-opening quotes (e.g.\@ at start of Contributions).
+      \item \textbf{Other:} glossaries (long-short acronyms), amsmath/mathtools, textcomp, pifont, siunitx, relsize, mhchem, enumitem, graphicx/caption, float/stfloats, subcaption, tabularray/longtable, algorithm/algpseudocode, verbatim, afterpage, lipsum, rotating. Prefer parenthetical asides in the main text; use footnotes only sparingly (see \texttt{main.tex}).
+    \end{itemize}
+
+    Conventions for citations, spaces (\verb|~|, \verb|\@|), dashes, and reviewer comments (\verb|%ID |) are in the comment block at the top of \texttt{main.tex}. Class options (parskip/parindent, fullwidth, italic) are documented there too.

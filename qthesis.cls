@@ -1,8 +1,9 @@
 
 % qthesis.cls -- Qyber thesis class
 % Engines: pdfLaTeX, XeLaTeX, LuaLaTeX.
-% Layout: A4, 12pt, 3cm margins; 1.5 line spacing; ragged-right;
-%   main text 12pt, footnotes and captions at least 11pt.
+% Layout: A4, 12pt, 3cm margins; 1.5 line spacing (default); raggedright (default) or justified;
+%   main text 12pt, footnotes and captions at least 11pt. Prefer parenthetical asides;
+%   use footnotes only sparingly (e.g. translations, optional clarifications).
 % Chapter style: number/letter and title on first line; header has a top bar
 %   and "Chapter N" or "Appendix A" label.
 %
@@ -11,6 +12,9 @@
 % This file may be distributed and/or modified under the terms of the
 % LaTeX Project Public License (LPPL), version 1.3c.
 % The latest version of this license is at https://www.latex-project.org/lppl/
+% This work has the LPPL maintenance status `maintained'.
+% The Current Maintainer of this work is Frank Langbein <frank@langbein.org>.
+% This work consists of this file and the template files in the same distribution.
 %
 % User commands (set in preamble): \title, \author, \degree, \university, \date;
 %   \license{SPDX-ID}, \copyrightholder{}, \licenseyear{} (optional).
@@ -18,7 +22,7 @@
 % Override acronym file: \renewcommand{\qthesisacronymfile}{yourfile.tex}.
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{qthesis}[2026/02/27 Qyber thesis class]
+\ProvidesClass{qthesis}[2026/03/01 Qyber thesis class]
 
 \makeatletter
 
@@ -26,20 +30,26 @@
 % Class options
 % ------------------------------------------------------------------------------
 % Font: mixed (default) = sans-serif text + serif math; sans = all sans-serif;
-%   serif = serif text and math.
+%   serif = serif text and math; hacker = typewriter/monospace open-source font throughout.
 % Layout: oneside (default) or twoside for double-sided printing.
 % Citation: numeric (default) [1], [1,2] or harvard (Author, 2000).
-% Any other option is passed through to the underlying book class.
+% Alignment: raggedright (default) = ragged-right; justified = fully justified text.
+\newif\ifqthesis@justify
+\qthesis@justifyfalse
+\DeclareOption{raggedright}{\qthesis@justifyfalse}
+\DeclareOption{justified}{\qthesis@justifytrue}
 
 \newif\ifqthesis@font@mixed
 \newif\ifqthesis@font@sans
 \newif\ifqthesis@font@serif
+\newif\ifqthesis@font@hacker
 \newif\ifqthesis@twoside
 \newif\ifqthesis@cite@harvard
 
 \qthesis@font@mixedtrue
 \qthesis@font@sansfalse
 \qthesis@font@seriffalse
+\qthesis@font@hackerfalse
 \qthesis@twosidefalse
 \qthesis@cite@harvardfalse
 
@@ -47,17 +57,31 @@
   \qthesis@font@mixedtrue
   \qthesis@font@sansfalse
   \qthesis@font@seriffalse
+  \qthesis@font@hackerfalse
 }
 \DeclareOption{sans}{%
   \qthesis@font@mixedfalse
   \qthesis@font@sanstrue
   \qthesis@font@seriffalse
+  \qthesis@font@hackerfalse
 }
 \DeclareOption{serif}{%
   \qthesis@font@mixedfalse
   \qthesis@font@sansfalse
   \qthesis@font@seriftrue
+  \qthesis@font@hackerfalse
 }
+\DeclareOption{hacker}{%
+  \qthesis@font@mixedfalse
+  \qthesis@font@sansfalse
+  \qthesis@font@seriffalse
+  \qthesis@font@hackertrue
+}
+
+\newif\ifqthesis@noobfuscate
+\qthesis@noobfuscatefalse
+\DeclareOption{noobfuscate}{\qthesis@noobfuscatetrue}
+\DeclareOption{obfuscate}{\qthesis@noobfuscatefalse}
 
 \DeclareOption{harvard}{\qthesis@cite@harvardtrue}
 \DeclareOption{numeric}{\qthesis@cite@harvardfalse}
@@ -70,6 +94,31 @@
   \PassOptionsToClass{oneside}{book}%
   \qthesis@twosidefalse
 }
+
+\newif\ifqthesis@onehalfspacing
+\newif\ifqthesis@linespread
+\qthesis@onehalfspacingtrue
+\qthesis@linespreadfalse
+\DeclareOption{single}{\qthesis@onehalfspacingfalse}
+\DeclareOption{onehalfspacing}{\qthesis@onehalfspacingtrue}
+\DeclareOption{linespread115}{\qthesis@linespreadtrue\def\qthesis@linespreadval{1.15}}
+\DeclareOption{linespread12}{\qthesis@linespreadtrue\def\qthesis@linespreadval{1.2}}
+
+% Paragraph style: parskip (default) = vertical space between paragraphs; parindent = traditional first-line indent
+\newif\ifqthesis@parindent
+\qthesis@parindentfalse
+\DeclareOption{parskip}{\qthesis@parindentfalse}
+\DeclareOption{parindent}{\qthesis@parindenttrue}
+
+% fullwidth = enable fullwidth environment and fullwidthfigure/fullwidthtable (extend into margin)
+\newif\ifqthesis@fullwidth
+\qthesis@fullwidthfalse
+\DeclareOption{fullwidth}{\qthesis@fullwidthtrue}
+
+% italic = chapter, section, subsection and captions in italic (default: bold/roman)
+\newif\ifqthesis@italic
+\qthesis@italicfalse
+\DeclareOption{italic}{\qthesis@italictrue}
 
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
 
@@ -143,11 +192,27 @@
 
 \RequirePackage{graphicx}% \includegraphics for figures
 \RequirePackage{amsmath,amsfonts,amssymb}% Standard math
-\RequirePackage{xcolor}% Used for link colour (qthesislinkblue)
-\RequirePackage{microtype}% Protrusion (and expansion under pdfTeX) for better typography
+\RequirePackage[dvipsnames,svgnames]{xcolor}% Link/cite colours (DarkBlue, DarkGreen)
+\RequirePackage[tracking]{microtype}% Protrusion, expansion; tracking enables \textls for letterspacing (e.g. \newthought)
 \RequirePackage{setspace}% \onehalfspacing
-\RequirePackage[document]{ragged2e}% \RaggedRight for left-aligned paragraphs
+\ifqthesis@justify
+  \RequirePackage{ragged2e}% justified body; package still available for \RaggedRight locally
+\else
+  \RequirePackage[document]{ragged2e}% \RaggedRight for left-aligned (ragged-right) paragraphs
+\fi
 \RequirePackage{etoolbox}% \pretocmd, \patchcmd, \ifstrempty, etc.
+\ifqthesis@fullwidth
+  \IfFileExists{changepage.sty}{%
+    \RequirePackage[strict]{changepage}%
+  }{%
+    \IfFileExists{chngpage.sty}{%
+      \RequirePackage[strict]{chngpage}%
+    }{%
+      \PackageWarning{qthesis}{fullwidth option requires changepage or chngpage; fullwidth disabled}%
+      \qthesis@fullwidthfalse
+    }%
+  }%
+\fi
 
 % When the .aux file is read at \begin{document}, the kernel sets \@writefile to
 % \@gobbletwo, so \@writefile{lof}{...} etc.\ are discarded and .lof/.lot/.loa
@@ -225,13 +290,27 @@
 }
 
 \RequirePackage[font=small]{caption}% Caption font at least 11pt
+\setlength{\abovecaptionskip}{6pt}%
+\setlength{\belowcaptionskip}{6pt}%
+\ifqthesis@italic
+  \captionsetup{labelfont=it,textfont=it}%
+\fi
 \RequirePackage{textcomp}% \textcopyright for copyright page, \textdegree, etc.
 
-% Link colour: used by hyperref and by our \href/\url overrides (no PDF border)
-\definecolor{qthesislinkblue}{RGB}{0,0,120}
+% Epigraph: chapter- or section-opening quote. Usage: \epigraph{quote text}{source}
+\newcommand{\epigraph}[2]{%
+  \par\vspace{1.5\baselineskip}%
+  \begin{flushright}%
+  \small #1\par
+  \vspace{0.5ex}%
+  \textit{#2}%
+  \end{flushright}%
+  \vspace{\baselineskip}%
+  \par
+}
 
 % ------------------------------------------------------------------------------
-% Font configuration (depends on class options: mixed, sans, serif)
+% Font configuration (depends on class options: mixed, sans, serif, hacker)
 % ------------------------------------------------------------------------------
 \ifPDFTeX
   \ifqthesis@font@mixed
@@ -246,6 +325,11 @@
   \ifqthesis@font@serif
     \RequirePackage{newtxtext}%
     \RequirePackage{newtxmath}%
+  \fi
+  \ifqthesis@font@hacker
+    \RequirePackage{inconsolata}%
+    \RequirePackage{newtxmath}%
+    \renewcommand{\familydefault}{\ttdefault}%
   \fi
 \else
   % XeLaTeX/LuaLaTeX: use fontspec; avoid scaling so 12pt is true document size
@@ -266,15 +350,249 @@
     \setsansfont{TeX Gyre Heros}%
     \setmonofont{TeX Gyre Cursor}%
   \fi
+  \ifqthesis@font@hacker
+    \ifqthesis@noobfuscate
+      \IfFontExistsTF{Fira Mono}{%
+        \setmainfont{Fira Mono}%
+        \setsansfont{Fira Mono}%
+        \setmonofont{Fira Mono}%
+      }{%
+        \setmainfont{Inconsolata}%
+        \setsansfont{Inconsolata}%
+        \setmonofont{Inconsolata}%
+      }%
+    \else
+      \ifluatex
+        \IfFileExists{fonts/hacker-obfuscated.otf}{%
+          \IfFileExists{fonts/obfuscate-perm.lua}{%
+            \directlua{%
+              local perm = dofile("fonts/obfuscate-perm.lua")
+              local PUA = 0xE000
+              luatexbase.add_to_callback("luaotfload.patch_font", function(tfmdata)
+                if not tfmdata or not tfmdata.characters then return end
+                if not tfmdata.characters[PUA] then return end
+                if tfmdata.characters[0x41] then return end
+                tfmdata.embedding = "full"
+                tfmdata.qthesis_obfuscated = true
+                for c = 0, 255 do
+                  local src = PUA + perm[c]
+                  if tfmdata.characters[src] then
+                    tfmdata.characters[c] = tfmdata.characters[src]
+                  end
+                end
+                for c = 0, 255 do
+                  local slot = PUA + perm[c]
+                  if tfmdata.characters[slot] then
+                    tfmdata.characters[slot].unicode = slot
+                    tfmdata.characters[slot].tounicode = slot
+                  end
+                end
+              end, "qthesis_obfuscate_full_embed")
+            }%
+            \setmainfont{hacker-obfuscated}[Path=fonts/,Extension=.otf]%
+            \setsansfont{hacker-obfuscated}[Path=fonts/,Extension=.otf]%
+            \setmonofont{hacker-obfuscated}[Path=fonts/,Extension=.otf]%
+            \renewcommand{\labelitemi}{\normalfont\char"B7}%
+            \renewcommand{\labelitemii}{\normalfont\char"B7}%
+            \renewcommand{\labelitemiii}{\normalfont\char"B7}%
+            \renewcommand{\labelitemiv}{\normalfont\char"B7}%
+            \AtBeginDocument{%
+              \directlua{%
+                local perm = dofile("fonts/obfuscate-perm.lua")
+                local PUA = 0xE000
+                local hlist_id = node.id("hlist")
+                local vlist_id = node.id("vlist")
+                local function obfuscate_glyphs(head)
+                  for n in node.traverse(head) do
+                    if n.id == node.id("glyph") then
+                      local tfm = fonts.hashes.identifiers[n.font]
+                      if tfm and tfm.qthesis_obfuscated and n.char >= 0 and n.char <= 255 and perm[n.char] then
+                        n.char = PUA + perm[n.char]
+                      end
+                    elseif (n.id == hlist_id or n.id == vlist_id) and n.head then
+                      obfuscate_glyphs(n.head)
+                    end
+                  end
+                  return head
+                end
+                luatexbase.add_to_callback("pre_linebreak_filter", obfuscate_glyphs, "qthesis_obfuscate")
+                luatexbase.add_to_callback("pre_output_filter", obfuscate_glyphs, "qthesis_obfuscate")
+              }%
+            }%
+          }{%
+            \PackageError{qthesis}{%
+              Obfuscation requires fonts/obfuscate-perm.lua.\MessageBreak
+              Run 'make hacker-font' first (see README).%
+            }{%
+              Then re-run LaTeX.%
+            }%
+          }%
+        }{%
+          \PackageError{qthesis}{%
+            Obfuscation requires fonts/hacker-obfuscated.otf.\MessageBreak
+            Run 'make hacker-font' first (see README).%
+          }{%
+            Then re-run LaTeX.%
+          }%
+        }%
+      \else
+        \PackageWarning{qthesis}{%
+          Obfuscation is supported only with LuaLaTeX.\MessageBreak
+          Using normal hacker font (no obfuscation). Use LuaLaTeX for obfuscation.%
+        }%
+        \IfFontExistsTF{Fira Mono}{%
+          \setmainfont{Fira Mono}%
+          \setsansfont{Fira Mono}%
+          \setmonofont{Fira Mono}%
+        }{%
+          \setmainfont{Inconsolata}%
+          \setsansfont{Inconsolata}%
+          \setmonofont{Inconsolata}%
+        }%
+      \fi
+    \fi
+  \fi
 \fi
 
 % ------------------------------------------------------------------------------
 % Layout defaults for the Qyber thesis class
 % ------------------------------------------------------------------------------
-\onehalfspacing
-\RaggedRight
+\ifqthesis@onehalfspacing
+  \onehalfspacing
+\else
+  \ifqthesis@linespread
+    \linespread{\qthesis@linespreadval}%
+  \else
+    \singlespacing
+  \fi
+\fi
+\ifqthesis@justify\else \RaggedRight\fi
 \emergencystretch=3em
-\RequirePackage{parskip}
+
+% Tight list style: smaller margins and label separation
+\setlength{\leftmargini}{1pc}
+\setlength{\leftmarginii}{1pc}
+\setlength{\leftmarginiii}{1pc}
+\setlength{\leftmarginiv}{1pc}
+\setlength{\leftmarginv}{1pc}
+\setlength{\leftmarginvi}{1pc}
+\setlength{\labelsep}{0.5pc}
+\setlength{\labelwidth}{\leftmargini}
+\addtolength{\labelwidth}{-\labelsep}
+
+% Quote environments: smaller type and indents
+\renewenvironment{verse}
+ {\let\\\@centercr
+  \list{}{\itemsep \z@
+  \itemindent -1pc%
+  \listparindent\itemindent
+  \rightmargin \leftmargin
+  \advance\leftmargin 1pc}%
+  \small%
+  \item\relax}
+ {\endlist}
+\renewenvironment{quotation}
+ {\list{}{\listparindent 1pc%
+  \itemindent \listparindent
+  \rightmargin \leftmargin
+  \parsep \z@ \@plus\p@}%
+  \small%
+  \item\relax\noindent\ignorespaces}
+ {\endlist}
+\renewenvironment{quote}
+ {\list{}{\rightmargin\leftmargin}%
+  \small%
+  \item\relax}
+ {\endlist}
+
+% Paragraph style: parskip (default) or parindent
+\ifqthesis@parindent
+  \setlength{\parindent}{1em}%
+  \setlength{\parskip}{0pt}%
+  \setlength{\RaggedRightParindent}{1em}% keep first-line indent when using \RaggedRight (ragged2e)
+\else
+  \RequirePackage{parskip}%
+\fi
+
+% ------------------------------------------------------------------------------
+% Full-width content (when option fullwidth is set): fullwidth env and
+% fullwidthfigure/fullwidthtable floats (extend into margin via adjustwidth).
+% ------------------------------------------------------------------------------
+\newlength{\qthesis@fullwidth@overhang}
+\setlength{\qthesis@fullwidth@overhang}{1.5cm}
+\ifqthesis@fullwidth
+  \newenvironment{fullwidth}{%
+    \begin{adjustwidth}{-\qthesis@fullwidth@overhang}{-\qthesis@fullwidth@overhang}%
+  }{%
+    \end{adjustwidth}%
+  }
+  \newenvironment{fullwidthfigure}[1][htbp]{%
+    \begin{figure}[#1]%
+    \begin{adjustwidth}{-\qthesis@fullwidth@overhang}{-\qthesis@fullwidth@overhang}%
+    \centering
+  }{%
+    \end{adjustwidth}%
+    \end{figure}%
+  }
+  \newenvironment{fullwidthtable}[1][htbp]{%
+    \begin{table}[#1]%
+    \begin{adjustwidth}{-\qthesis@fullwidth@overhang}{-\qthesis@fullwidth@overhang}%
+    \centering
+  }{%
+    \end{adjustwidth}%
+    \end{table}%
+  }
+\else
+  \newenvironment{fullwidth}{%
+    \begingroup
+  }{%
+    \endgroup
+  }
+\fi
+
+% ------------------------------------------------------------------------------
+% \newthought and letterspacing
+% ------------------------------------------------------------------------------
+\newskip\qthesis@newthoughtskip
+\setlength{\qthesis@newthoughtskip}{1.0\baselineskip plus 0.5ex minus 0.2ex}
+\@ifundefined{textls}{%
+\PackageWarning{qthesis}{textls (microtype) not available; small caps without letterspacing}%
+\newcommand{\newthought}[1]{\par\vspace{\qthesis@newthoughtskip}\noindent\textsc{#1}}%
+}{%
+\newcommand{\newthought}[1]{\par\vspace{\qthesis@newthoughtskip}\noindent\textls[50]{\scshape #1}}%
+}
+
+% ------------------------------------------------------------------------------
+% Section/subsection: compact spacing and [hang] (titlesec); optional italic
+% ------------------------------------------------------------------------------
+\RequirePackage{titlesec}%
+\ifqthesis@italic
+  \titleformat{\section}[hang]{\normalfont\Large\itshape}{\thesection}{1em}{}%
+  \titleformat{\subsection}[hang]{\normalfont\large\itshape}{\thesubsection}{1em}{}%
+\else
+  \titleformat{\section}[hang]{\normalfont\Large\bfseries}{\thesection}{1em}{}%
+  \titleformat{\subsection}[hang]{\normalfont\large\bfseries}{\thesubsection}{1em}{}%
+\fi
+\titlespacing*{\section}{0pt}{3.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}%
+\titlespacing*{\subsection}{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}%
+\setlength{\abovedisplayskip}{6pt plus 2pt minus 4pt}%
+\setlength{\belowdisplayskip}{6pt plus 2pt minus 4pt}%
+
+% First paragraph after section/chapter: no indent when parindent option is set
+\ifqthesis@parindent
+  \let\qthesis@orig@afterheading\@afterheading
+  \renewcommand{\@afterheading}{%
+    \qthesis@orig@afterheading
+    \noindent
+  }
+\fi
+
+% Footnote rule: thin rule and spacing above footnotes
+\renewcommand{\footnoterule}{%
+  \vspace*{4pt}%
+  \hrule width 0.4\columnwidth height 0.4pt
+  \vspace{4pt}%
+}
 
 % At document start: ensure footnotes/captions stay at least 11pt (\small);
 % if \license was set, load qthesis-licenses.tex for full license text in the
@@ -293,21 +611,21 @@
   unicode=true,
   breaklinks=true,
   colorlinks=true,
-  linkcolor=qthesislinkblue,
-  citecolor=qthesislinkblue,
-  urlcolor=qthesislinkblue,
-  filecolor=qthesislinkblue,
-  menucolor=qthesislinkblue
+  linkcolor=DarkBlue,
+  citecolor=DarkGreen,
+  urlcolor=DarkGreen,
+  filecolor=DarkBlue,
+  menucolor=DarkBlue
 }
-% Override \href and \UrlFont so all links use qthesislinkblue (no box, just colour)
+% Override \href and \UrlFont: internal/cross-ref links in DarkBlue, URLs in DarkGreen (no box)
 \let\qthesis@orig@href\href
 \renewcommand{\href}[2]{%
   \qthesis@orig@href{#1}{%
-    {\color{qthesislinkblue}#2}%
+    {\color{DarkBlue}#2}%
   }%
 }
 
-\def\UrlFont{\ttfamily\color{qthesislinkblue}}%
+\def\UrlFont{\ttfamily\color{DarkGreen}}%
 
 % ------------------------------------------------------------------------------
 % Page style (headers and footers)
@@ -332,45 +650,66 @@
   \renewcommand{\footrulewidth}{0pt}%
 }
 
-% Running heads: page number; section/chapter title in main matter only; thin rule
+% Running heads: mark (left) in small caps; page number (right). Twoside: mark inner, page outer.
+% Plain: thin rule only (used on all non–chapter-start pages).
 \fancypagestyle{plain}{%
   \fancyhf{}%
   \ifqthesis@twoside
     \fancyhead[LE,RO]{\thepage}%
-    \if@mainmatter
-      \fancyhead[LO,RE]{\slshape\leftmark}%
-    \else
-      \fancyhead[LO,RE]{}%
-    \fi
+    \fancyhead[LO,RE]{\textls[50]{\scshape\leftmark}}%
   \else
+    \fancyhead[L]{\textls[50]{\scshape\leftmark}}%
     \fancyhead[R]{\thepage}%
-    \if@mainmatter
-      \fancyhead[L]{\slshape\leftmark}%
-    \else
-      \fancyhead[L]{}%
-    \fi
   \fi
   \renewcommand{\headrulewidth}{\qthesis@headruleheight}%
 }
 
-% Chapter opening page: page number and "Chapter N" / "Appendix A" in header with thick rule
+% Chapter start pages that use plain header (front matter, starred chapters, non-appendix back matter):
+% same header as plain but thick rule on right, no label text.
+\fancypagestyle{plainchapter}{%
+  \fancyhf{}%
+  \ifqthesis@twoside
+    \fancyhead[LE,RO]{\thepage}%
+    \fancyhead[LO,RE]{\textls[50]{\scshape\leftmark}}%
+  \else
+    \fancyhead[L]{\textls[50]{\scshape\leftmark}}%
+    \fancyhead[R]{\thepage}%
+  \fi
+  \renewcommand{\headrule}{%
+    \begingroup
+      \normalfont
+      \setlength{\dimen0}{3em}%
+      \vskip2pt
+      \hrule\@height\qthesis@headruleheight\@width\headwidth
+      \vskip-\qthesis@headruleheight
+      \hbox to\headwidth{\hfill\vrule\@height\qthesis@headruleheight@thick\@width\dimen0}%
+      \vskip-0.3\baselineskip
+    \endgroup
+  }%
+  \renewcommand{\headrulewidth}{0pt}%
+}
+
+% Chapter opening (main matter / appendix): mark (left), page number + "CHAPTER N" / "APPENDIX A" (right) with thick rule.
+% Same small caps + letterspacing as plain running heads.
 \fancypagestyle{chapter}{%
   \fancyhf{}%
   \ifqthesis@twoside
-    \fancyhead[RO,LE]{\thepage}%
+    \fancyhead[LE,RO]{\thepage}%
+    \fancyhead[LO,RE]{\textls[50]{\scshape\leftmark}}%
   \else
+    \fancyhead[L]{\textls[50]{\scshape\leftmark}}%
     \fancyhead[R]{\thepage}%
   \fi
   \renewcommand{\headrule}{%
     \begingroup
       \normalfont
       \setlength{\dimen0}{0pt}%
-      \settowidth{\dimen0}{\Large\bfseries\ \MakeUppercase{\@chapapp}~\qthesis@chapterlabel}%
+      \settowidth{\dimen0}{\Large\textls[50]{\scshape\ifqthesis@italic\itshape\else\bfseries\fi\ \MakeUppercase{\@chapapp}~\qthesis@chapterlabel}}%
       \vskip2pt
       \hrule\@height\qthesis@headruleheight\@width\headwidth
       \vskip-\qthesis@headruleheight
       \hbox to\headwidth{\hfill\vrule\@height\qthesis@headruleheight@thick\@width\dimen0}%
-      \hbox to\headwidth{\hfill\Large\bfseries \MakeUppercase{\@chapapp}~\qthesis@chapterlabel}%
+      \hbox to\headwidth{\hfill\Large\textls[50]{\scshape\ifqthesis@italic\itshape\else\bfseries\fi \MakeUppercase{\@chapapp}~\qthesis@chapterlabel}}%
       \vskip-0.3\baselineskip
     \endgroup
   }%
@@ -386,8 +725,8 @@
 % Front matter chapters (unnumbered) get no number. \qthesis@chapterlabel is
 % what appears in the header (number or appendix letter).
 \def\@makechapterhead#1{%
-  \vspace*{3\baselineskip}%
-  {\noindent\Huge\bfseries
+  \vspace*{2\baselineskip}%
+  {\noindent\Huge\ifqthesis@italic\itshape\else\bfseries\fi
     \if@mainmatter
       \thechapter.\ %
     \else
@@ -396,17 +735,21 @@
       \fi
     \fi
     #1\par}%
-  \vspace{2\baselineskip}%
+  \vspace{1.5\baselineskip}%
+  \ifqthesis@parindent \everypar{\noindent \everypar{}}\fi
 }
 \def\@makeschapterhead#1{%
-  \vspace*{3\baselineskip}%
-  {\noindent\Huge\bfseries #1\par}%
-  \vspace{2\baselineskip}%
+  \vspace*{2\baselineskip}%
+  {\noindent\Huge\ifqthesis@italic\itshape\else\bfseries\fi #1\par}%
+  \vspace{1.5\baselineskip}%
+  \ifqthesis@parindent \everypar{\noindent \everypar{}}\fi
 }
 
-% First page of unstarred chapters uses "chapter" style; starred chapters use "plain"
+% First page of unstarred chapters: "chapter" style in main/appendix; "plainchapter" (thick bar, no text) in front matter.
+% First page of starred chapters (Lists, Abstract, etc.): "plainchapter".
 \newif\ifqthesis@inappendix
 \qthesis@inappendixfalse
+\newif\ifqthesis@numberedchapter
 \newcommand{\qthesis@chapterletter}{}
 \def\qthesis@chapterlabel{\ifqthesis@inappendix \qthesis@chapterletter \else \thechapter \fi}
 
@@ -436,27 +779,74 @@
 }
 
 % On each (unstarred) chapter: use "chapter" style on first page in main matter or
-% appendix; otherwise "plain". Then switch to plain for following pages.
+% appendix; otherwise "plain". Only numbered chapters (main + appendix) get label in mark.
 \pretocmd{\@chapter}{%
   \if@mainmatter
+    \qthesis@numberedchaptertrue
     \thispagestyle{chapter}%
   \else
     \ifqthesis@inappendix
+      \qthesis@numberedchaptertrue
       \refstepcounter{chapter}%
       \xdef\qthesis@chapterletter{\@Alph\c@chapter}%
       \global\advance\c@qthesis@appendixtoc@flag\@ne
       \thispagestyle{chapter}%
     \else
-      \thispagestyle{plain}%
+      \qthesis@numberedchapterfalse
+      \thispagestyle{plainchapter}%
     \fi
   \fi
   \pagestyle{plain}%
 }{}{}
 
-\pretocmd{\@schapter}{%
-  \thispagestyle{plain}%
-  \pagestyle{plain}%
-}{}{}
+% Starred chapters (Lists, Dedication, Acknowledgements, Bibliography, License, etc.): set mark and use plainchapter style.
+% Patch at begin document so we run after packages that may redefine \@schapter.
+% Prepend thispagestyle so TOC/LOF/LOT/glossary (all use \chapter*) get plainchapter; append mark and pagestyle.
+\AtBeginDocument{%
+  \pretocmd{\@schapter}{\thispagestyle{plainchapter}}{}{}%
+  \apptocmd{\@schapter}{%
+    \qthesis@numberedchapterfalse
+    \chaptermark{##1}%
+    \pagestyle{plain}%
+  }{}{}%
+}
+
+% TOC/LOF/LOT use uppercase names (e.g. LIST OF FIGURES); set mark to title case so header small caps look correct.
+% Table of contents: patch at class load (book's definition is usually not redefined).
+\patchcmd{\tableofcontents}{\@starttoc{toc}}{\chaptermark{Contents}\thispagestyle{plainchapter}\@starttoc{toc}}{}{}
+% Bibliography: set mark to title case (natbib uses \bibsection; plain book uses \thebibliography).
+\AtBeginDocument{%
+  \patchcmd{\bibsection}{\@mkboth{\MakeUppercase{\bibname}}{\MakeUppercase{\bibname}}}{\@mkboth{\bibname}{\bibname}}{}{}%
+  \patchcmd{\thebibliography}{\@mkboth{\MakeUppercase\bibname}{\MakeUppercase\bibname}}{\@mkboth{\bibname}{\bibname}}{}{}%
+}%
+% LOF/LOT/LOA: run with \MakeUppercase disabled; ensure plainchapter on first page (patch before wrapping).
+\AtBeginDocument{%
+  \patchcmd{\listoffigures}{\chapter*{\listfigurename}}{\chapter*{\listfigurename}\thispagestyle{plainchapter}}{}{}%
+  \patchcmd{\listoftables}{\chapter*{\listtablename}}{\chapter*{\listtablename}\thispagestyle{plainchapter}}{}{}%
+  \let\qthesis@orig@listoffigures\listoffigures
+  \renewcommand{\listoffigures}{%
+    \let\qthesis@saved@MakeUppercase\MakeUppercase
+    \let\MakeUppercase\@firstofone
+    \qthesis@orig@listoffigures
+    \let\MakeUppercase\qthesis@saved@MakeUppercase
+  }%
+  \let\qthesis@orig@listoftables\listoftables
+  \renewcommand{\listoftables}{%
+    \let\qthesis@saved@MakeUppercase\MakeUppercase
+    \let\MakeUppercase\@firstofone
+    \qthesis@orig@listoftables
+    \let\MakeUppercase\qthesis@saved@MakeUppercase
+  }%
+  \@ifundefined{listofalgorithms}{}{%
+    \let\qthesis@orig@listofalgorithms\listofalgorithms
+    \renewcommand{\listofalgorithms}{%
+      \let\qthesis@saved@MakeUppercase\MakeUppercase
+      \let\MakeUppercase\@firstofone
+      \qthesis@orig@listofalgorithms
+      \let\MakeUppercase\qthesis@saved@MakeUppercase
+    }%
+  }%
+}
 
 % Standard book class omits \numberline for backmatter chapters, so appendix
 % entries in the TOC would show no "A", "B". We wrap \addcontentsline and
@@ -489,9 +879,25 @@
 % Put the bibliography into the TOC as a chapter
 \patchcmd{\thebibliography}{\bibsection}{\bibsection\addcontentsline{toc}{chapter}{\bibname}}{}{}
 
-% Supply \leftmark for running heads (chapter title or section number + title)
-\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
-\renewcommand{\sectionmark}[1]{\markboth{\thesection\ #1}{}}
+% Supply \leftmark for running heads.
+% Numbered chapters (main matter + appendix): label + title (e.g. "1. Introduction", "A. Title").
+% Unnumbered (starred) chapters: title only (Contents, Abstract, Bibliography, License, etc.).
+\renewcommand{\chaptermark}[1]{%
+  \ifqthesis@numberedchapter
+    \markboth{\qthesis@chapterlabel. #1}{}%
+  \else
+    \markboth{#1}{}%
+  \fi
+}
+\renewcommand{\sectionmark}[1]{%
+  \if@mainmatter
+    \markboth{\ifnum\c@secnumdepth>\z@\thesection\ \fi#1}{}%
+  \else
+    \ifqthesis@inappendix
+      \markboth{\ifnum\c@secnumdepth>\z@\thesection\ \fi#1}{}%
+    \fi
+  \fi
+}
 \renewcommand{\subsectionmark}[1]{}
 
 % ------------------------------------------------------------------------------
@@ -613,8 +1019,9 @@
     \cleardoublepage
   \fi
   \begingroup
-    \chapter*{Abstract}%
-    \addcontentsline{toc}{chapter}{Abstract}%
+    \chapter{Abstract}%
+    %\qthesis@numberedchapterfalse%
+    %\chaptermark{Abstract}%
     #1%
   \endgroup
   \cleardoublepage
@@ -711,6 +1118,8 @@
   \ifqthesis@license
     \qthesis@resolvelicense
     \chapter*{License}\label{sec:license}%
+    \qthesis@numberedchapterfalse
+    \chaptermark{License}%
     \addcontentsline{toc}{chapter}{License}%
     This work is licensed under the \qthesis@lic@name.\\{\ttfamily SPDX-License-Identifier: \qthesis@licenseid}\par
     \vspace{1ex}

@@ -37,7 +37,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute (GitHub PRs, patche
 
 ## License and copyright
 
-Template and class: **LPPL-1.3c**, Copyright (C) 2026 Frank Langbein \<<frank@langbein.org>\>. See the [LaTeX Project Public License](https://www.latex-project.org/lppl/). The `LICENSE` file in this directory contains the short notice.
+Template and class: **LPPL-1.3c**, Copyright (C) 2026 Frank Langbein \<<frank@langbein.org>\>. The Current Maintainer of this work is Frank Langbein [frank@langbein.org](mailto:frank@langbein.org). See the [LaTeX Project Public License](https://www.latex-project.org/lppl/). The `LICENSE` file in this directory contains the short notice.
 
 ## Reviewer comments (`%ID`)
 

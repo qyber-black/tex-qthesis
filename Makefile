@@ -27,6 +27,7 @@ help:
 	@echo "  make help      Show this help."
 	@echo "  make clean    Remove build artifacts (keep PDF)."
 	@echo "  make distclean  clean + remove $(MAIN).pdf"
+	@echo "  make hacker-font  Generate local obfuscated font for hacker option (run once; optional SEED=n)."
 	@echo "  make wordcount  Per-file and total word count (captions shown separately)."
 	@echo "  make check    Run quality checks (REUSE lint, optional thesis-specific)."
 	@echo ""
@@ -48,7 +49,13 @@ endif
 
 LATEXMK = latexmk
 
-.PHONY: clean distclean wordcount check help
+.PHONY: clean distclean wordcount check help hacker-font
+
+# Hacker obfuscation: generate local permuted font and permutation table (different per run unless SEED set)
+hacker-font:
+	@mkdir -p fonts
+	$(if $(SEED),python3 scripts/build-hacker-font.py --output-dir fonts --seed $(SEED),python3 scripts/build-hacker-font.py --output-dir fonts)
+	@echo "Run 'make' with document class option 'hacker' (and ENGINE=lualatex) to use obfuscation."
 
 $(MAIN).pdf: $(MAIN).tex qthesis.cls bibliography.bib acronyms.tex \
 	C1/chapter1.tex C2/chapter2.tex C3/chapter3.tex C4/chapter4.tex \
@@ -67,6 +74,7 @@ clean:
 distclean: clean
 	$(LATEXMK) -C $(MAIN)
 	rm -f $(MAIN).pdf
+	rm -rf fonts
 
 # Word count: includes \input files (-inc). Full count = text + headers + captions.
 # Caption words are shown separately per file and in total.
