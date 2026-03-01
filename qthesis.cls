@@ -454,7 +454,7 @@
     \fi
   \fi
   \RequirePackage{unicode-math}%
-  \setmathfont{TeX Gyre Termes Math}%
+  \setmathfont{TeX Gyre Termes Math}[Scale=MatchLowercase]%
 \fi
 
 % ------------------------------------------------------------------------------
