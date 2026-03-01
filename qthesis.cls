@@ -320,6 +320,7 @@
   \fi
   \ifqthesis@font@sans
     \RequirePackage[default]{sourcesanspro}%
+    \RequirePackage{newtxmath}%
     \renewcommand{\familydefault}{\sfdefault}%
   \fi
   \ifqthesis@font@serif
@@ -452,6 +453,8 @@
       \fi
     \fi
   \fi
+  \RequirePackage{unicode-math}%
+  \setmathfont{TeX Gyre Termes Math}%
 \fi
 
 % ------------------------------------------------------------------------------
