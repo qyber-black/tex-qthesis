@@ -18,7 +18,7 @@
 %
 % User commands (set in preamble): \title, \author, \degree, \university, \date;
 %   \license{SPDX-ID}, \copyrightholder{}, \licenseyear{} (optional).
-% In document: \maketitle{abstract text}; \bib{basename} for bibliography.
+% In document: \maketitle{abstract text}; \dedication{text} (optional); \bib{basename} for bibliography.
 % Override acronym file: \renewcommand{\qthesisacronymfile}{yourfile.tex}.
 
 \NeedsTeXFormat{LaTeX2e}
@@ -519,7 +519,7 @@
 % fullwidthfigure/fullwidthtable floats (extend into margin via adjustwidth).
 % ------------------------------------------------------------------------------
 \newlength{\qthesis@fullwidth@overhang}
-\setlength{\qthesis@fullwidth@overhang}{1.5cm}
+\setlength{\qthesis@fullwidth@overhang}{2cm}
 \ifqthesis@fullwidth
   \newenvironment{fullwidth}{%
     \begin{adjustwidth}{-\qthesis@fullwidth@overhang}{-\qthesis@fullwidth@overhang}%
@@ -917,6 +917,15 @@
 \newcommand{\university}[1]{\gdef\qthesis@university{#1}}
 \renewcommand{\date}[1]{\gdef\qthesis@date{#1}}
 
+% Optional: keywords (only shown when \keywords{...} was called with non-empty argument)
+\gdef\qthesis@keywords{}%
+\newif\ifqthesis@haskeywords
+\qthesis@haskeywordsfalse
+\newcommand{\keywords}[1]{%
+  \gdef\qthesis@keywords{#1}%
+  \ifstrempty{#1}{}{\qthesis@haskeywordstrue}%
+}
+
 % ------------------------------------------------------------------------------
 % License and copyright (SPDX)
 % ------------------------------------------------------------------------------
@@ -1009,6 +1018,14 @@
   \end{titlepage}
 }
 
+% Dedication: \dedication{...} inserts an unnumbered dedication chapter at that point.
+\newcommand{\dedication}[1]{%
+  \chapter[Dedication]{}\chaptermark{Dedication}%
+  \ \hfill\parbox{0.5\textwidth}{\begin{flushright}\slshape
+  #1%
+  \end{flushright}}\hspace{2.4em}%
+}
+
 % Full front-matter sequence: title page, optional copyright page, abstract,
 % then \frontlists (TOC, List of Figures, List of Tables, List of Algorithms, List of Acronyms)
 \renewcommand{\maketitle}[1]{%
@@ -1023,6 +1040,9 @@
     %\qthesis@numberedchapterfalse%
     %\chaptermark{Abstract}%
     #1%
+    \ifqthesis@haskeywords
+      \par\vspace{1\baselineskip}\noindent\textbf{Keywords:}\ \qthesis@keywords\par
+    \fi
   \endgroup
   \cleardoublepage
   \frontlists
@@ -1106,6 +1126,8 @@
 % ------------------------------------------------------------------------------
 % Bibliography
 % ------------------------------------------------------------------------------
+% Title of the bibliography chapter (natbib uses \bibname in \bibsection).
+\renewcommand{\bibname}{References}
 % \bib{basename} sets bibliography style (harvard -> agsm, numeric -> plainnat),
 % optionally prints the License chapter (with full text if qthesis-licenses.tex
 % defined it for this SPDX ID), then \bibliography{basename}.

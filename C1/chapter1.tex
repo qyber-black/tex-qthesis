@@ -1,14 +1,13 @@
 % =============================================================================
-% CHAPTER 1: Introduction (thesis template + feature demonstration)
+% CHAPTER 1: Introduction
 % =============================================================================
 % SPDX-FileCopyrightText: 2026 Frank Langbein <frank@langbein.org>
 % SPDX-License-Identifier: LPPL-1.3c
 %
-% This chapter is structured as a typical thesis introduction: motivation,
-% research questions, contributions, and thesis roadmap. Replace each section
-% with your own content. It also demonstrates packages and class features
-% (citations, figures, tables, etc.); see comments and Section~\ref{sec:ch1-reference}.
-% Document-level conventions (citations, formatting, %ID comments) are in main.tex.
+% Suggested sections: Motivation and context; Research questions and objectives;
+% Contributions; Thesis structure (roadmap). Optional: Scope, Terminology.
+% This file also demonstrates template features; see Section~\ref{sec:ch1-reference}.
+% Remove that section for your own thesis. Document-level conventions are in main.tex.
 % =============================================================================
 
 % -----------------------------------------------------------------------------
@@ -37,7 +36,7 @@ As shown in previous work~\citep{example-paper}, we follow standard practice.
 
 \section{Research questions and objectives}\label{sec:objectives}
 
-State your main research question and break it down into objectives. The following is a placeholder list (enumitem package: custom labels).
+State your main research question and break it down into objectives. For science theses, state hypotheses (H1, H2) or research questions (RQ1--RQ3) explicitly and use \verb|\label{rq1}|, \verb|\label{rq2}| (or \verb|\label{h1}|, etc.) so you can refer to them in Methods (e.g.\@ design per RQ) and Results/Discussion (e.g.\@ ``Results for RQ1'', Section~\ref{sec:results-main}). The following is a placeholder list (enumitem package: custom labels).
 
 \begin{enumerate}[label=\textbf{O\arabic*:}, leftmargin=*]
   \item First objective: replace with your own.
@@ -168,10 +167,7 @@ Tables: use \texttt{booktabs} (\verb|\toprule|, \verb|\midrule|, \verb|\bottomru
 
 Outline how the rest of the thesis is organised so the reader knows what to expect. Reference chapters by label.
 
-\subsection{Reading order}\label{sec:roadmap-order}
-
-Chapters are intended to be read in sequence; the appendix can be consulted as needed. This subsection illustrates \verb|\subsection| (and optional italic style with class option \texttt{italic}).
-
+The remainder of the thesis is organised as follows.
 \begin{itemize}
   \item \textbf{Chapter~\ref{ch2}} (Literature Review): surveys prior work and identifies the gap.
   \item \textbf{Chapter~\ref{ch3}} (Methods): describes design and procedure.
@@ -179,7 +175,7 @@ Chapters are intended to be read in sequence; the appendix can be consulted as n
   \item \textbf{Chapter~\ref{ch5}} (Discussion): interpretation and limitations.
   \item \textbf{Chapter~\ref{ch6}} (Further Analysis): extended or supplementary results.
   \item \textbf{Chapter~\ref{ch7}} (Conclusions): answers to research questions and future work.
-  \item \textbf{Appendix~\ref{app:supp}}: supplementary material (tables, derivations, notation).
+  \item \textbf{Appendix~\ref{app:A}} (Supplementary methods) and \textbf{Appendix~\ref{app:B}} (Supplementary figures and tables).
 \end{itemize}
 
 Algorithms (algorithm, algpseudocode) appear in the List of Algorithms (Algorithm~\ref{alg:demo}). Use \texttt{[t]} or \texttt{[!t]} for top placement like figures/tables. For code snippets use verbatim; for wide tables or figures use \texttt{\string

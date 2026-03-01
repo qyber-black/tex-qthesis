@@ -3,7 +3,7 @@
 > SPDX-FileCopyrightText: 2026 Frank Langbein <frank@langbein.org>\
 > SPDX-License-Identifier: LPPL-1.3c
 
-The **qthesis** class is a LaTeX class for research degree theses, plus a ready-to-use template. It provides a clean layout (A4, 12pt, 1.5 spacing), optional sans/serif/mixed fonts, numeric or author--year citations, and a compact chapter style. The template in this directory demonstrates all features and can be filled with your own content.
+The **qthesis** class is a LaTeX class for research degree theses, plus a ready-to-use template. It provides a clean layout (A4, 12pt, 1.5 spacing), optional sans/serif/mixed fonts, numeric or author--year citations, and a compact chapter style. The template suggests a common PhD structure (Introduction, Literature Review, Methods, Results, Discussion, optional Further Analysis, Conclusions and Future Work); chapters and sections can be adapted to the candidate's needs. The template in this directory demonstrates all features and can be filled with your own content.
 
 ## Build
 
@@ -13,15 +13,15 @@ The Makefile uses **latexmk** to run the LaTeX engine, bibliography, and cross-r
 - **Remove build artifacts:** `make clean`. Use `make distclean` to also remove `main.pdf`.
 - **Word count:** `make wordcount` for per-file and total word count (caption words shown separately).
 
-**Choose the LaTeX engine** with the `ENGINE` variable (default: `pdf` = pdflatex):
+**Choose the LaTeX engine** with the `ENGINE` variable (default: `lua` = lualatex):
 
-- `make` or `make ENGINE=pdf` — pdflatex
-- `make ENGINE=xelatex` — XeLaTeX
-- `make ENGINE=lualatex` — LuaLaTeX
+- `make` or `make ENGINE=lua` — LuaLaTeX
+- `make ENGINE=pdf` — pdfLaTeX
+- `make ENGINE=xe` — XeLaTeX
 
 ## Requirements
 
-You need **latexmk**, **pdflatex** (or xelatex/lualatex if you switch engine), **makeglossaries** (for acronyms), and **bibtex** (for the bibliography). Install them via your distribution (TeX Live, MiKTeX, etc.).
+You need **latexmk**, **lualatex** (or pdflatex/xelatex if you switch engine), **makeglossaries** (for acronyms), and **bibtex** (for the bibliography). Install them via your distribution (TeX Live, MiKTeX, etc.).
 
 ## Quality checks
 

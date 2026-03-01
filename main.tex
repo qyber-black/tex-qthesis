@@ -2,7 +2,7 @@
 % Template thesis using the qthesis class
 % =============================================================================
 % This file is the main entry point. Build: make (uses latexmk; see Makefile).
-% To use another engine: make ENGINE=xelatex or make ENGINE=lualatex.
+% Default engine: lualatex. To use another: make ENGINE=pdf or make ENGINE=xe.
 %
 % SPDX-FileCopyrightText: 2026 Frank Langbein <frank@langbein.org>
 % SPDX-License-Identifier: LPPL-1.3c
@@ -20,6 +20,35 @@
 % captions at least 11pt; preliminary pages in roman numerals, then Arabic
 % for main matter. Chapter style: top bar in header, ``Chapter N'' or
 % ``Appendix A'' in header; number/letter and title on first line of chapter.
+%
+% -----------------------------------------------------------------------------
+% Thesis structure
+% -----------------------------------------------------------------------------
+% Main body: Introduction, Literature Review, Methods, Results, Discussion,
+% optional Further Analysis, Conclusions and Future Work. Adapt as needed
+% (e.g.\@ multiple results or theory chapters, merged Discussion/Results).
+% See each chapter file for suggested sections and alternatives.
+%
+% Suggested sections at a glance (omit/rename as needed):
+%   1 Introduction:    Motivation and context; Research questions and objectives;
+%                      Contributions; Thesis structure (roadmap). Optional: Scope, Terminology.
+%   2 Literature Review: Thematic sections (e.g.\@ by area or chronology); end with
+%                      gap and positioning. Optional: Theory and concepts; subsections by theme.
+%   3 Methods:         Research design; Design; Procedure; Implementation or experimental
+%                      setup. Optional: Data/sources; Ethical considerations; Theory/formal framework.
+%   4 Results:         Setup or experimental protocol; Main findings; optional Additional results.
+%                      Optional subsections: by research question, by dataset or condition.
+%   5 Discussion:      Interpretation; Limitations; Comparison with prior work.
+%                      Optional: Implications; Threats to validity.
+%   6 Further Analysis: Optional chapter: sensitivity analysis, extensions, case studies.
+%                      Sections as needed (e.g.\@ Analysis, Implications).
+%   7 Conclusions:     Conclusions (summary of aims and results; no new material); Future work.
+%
+% Structure variants (adapt as needed): thesis-by-publication (compilation of
+% papers plus intro/conclusion chapters); multiple results or theory chapters
+% (e.g.\@ Study 1, Study 2, or Theory, Experiment 1, Experiment 2); merged
+% Results and Discussion. Ch6 (Further Analysis) can be omitted or folded into
+% Results/Discussion. See comment in Ch2 for splitting Literature Review.
 %
 % -----------------------------------------------------------------------------
 % Class options
@@ -51,6 +80,8 @@
 % -----------------------------------------------------------------------------
 % \title, \author, \degree, \university, \date drive the generated title page
 % (bold title, name, degree, university, month/year).
+% Optional: \keywords{...} is typeset after the abstract (e.g.\@
+% \keywords{keyword one; keyword two; keyword three}). Many institutions require keywords.
 %
 % -----------------------------------------------------------------------------
 % License and copyright (SPDX)
@@ -68,9 +99,9 @@
 % -----------------------------------------------------------------------------
 % \maketitle{...} produces: title page; then (if \license set) copyright page;
 % then abstract; then frontlists: TOC, LOF, LOT, LOA, List of Acronyms.
-% For unnumbered chapters (Dedication, Acknowledgements, Declaration, Publications,
-% data and code, etc.) use \chapter*{Title} and \addcontentsline{toc}{chapter}{Title}
-% so they appear in TOC.
+% Optional unnumbered chapters: \dedication{...}; Acknowledgements; Declaration;
+% Publications, data and code. Use \chapter*{Title} and \addcontentsline{toc}{chapter}{Title}
+% for those that are not provided by the class (e.g.\@ \dedication is a class command).
 %
 % -----------------------------------------------------------------------------
 % Chapters and back matter
@@ -79,6 +110,13 @@
 % \bib{basename} runs bibliography (and inserts License chapter if \license set).
 % Appendices: \appendix then \chapter for each; lettered A, B, ... in headers/TOC.
 % Natbib: numeric -> plainnat; harvard -> agsm.
+%
+% -----------------------------------------------------------------------------
+% Headings: use title case for chapter titles (capitalise major words; keep
+% articles, conjunctions, and short prepositions lowercase unless first/last
+% word). Use sentence case for sections, subsections, and below (only the
+% first letter and proper nouns capitalised). Or adjust as preferred, but keep
+% it consistent.
 %
 % -----------------------------------------------------------------------------
 % LaTeX formatting (citations, spaces, dashes, quotes)
@@ -207,6 +245,9 @@
 \copyrightholder{Your Full Name}
 \licenseyear{2026}
 
+% Optional: keywords appear after the abstract.
+\keywords{keyword one; keyword two; keyword three}
+
 \begin{document}
 
 \frontmatter
@@ -215,22 +256,24 @@
 % then frontlists: TOC, List of Figures, List of Tables, List of Algorithms,
 % List of Acronyms (if acronyms.tex defines \newacronym).
 \maketitle{%
-  This is the abstract: a short, self-contained summary of the thesis (maximum
-  300 words). It should state the problem, methods, and main contributions
-  so that a reader can understand the scope without reading the full document.
-  The \texttt{qthesis} class typesets it as an unnumbered chapter and adds it to
-  the table of contents.
+  This is the abstract: a short, self-contained summary of the thesis. It
+  should state the problem, methods, and main contributions so that a reader
+  can understand the scope without reading the full document. Optionally
+  include one sentence on data/code availability (e.g.\@ ``Data and code are
+  available as described in the chapter Publications, Data and Code''). The
+  \texttt{qthesis} class typesets it as an unnumbered chapter and adds it to
+  the table of contents. If you set \texttt{\string\keywords\{...\}}, they
+  appear after the abstract.
 }
 
 % -----------------------------------------------------------------------------
 % Optional front-matter chapters (unnumbered).
 % -----------------------------------------------------------------------------
 
-\chapter[Dedication]{}\chaptermark{Dedication}
-\ \hfill\parbox{0.25\textwidth}{\begin{flushright}\slshape%
-% Replace with your dedication (one or two lines).
-To my family.%
-\end{flushright}}\hspace{2.4em}
+\dedication{%
+  % Replace with your dedication (one or two lines); optional.
+  To my family.
+}
 
 \chapter{Acknowledgements}
 % Replace with your acknowledgements. Here you can also acknowledge any contributions from other
@@ -294,8 +337,11 @@ Code produced for this thesis is available from [repository/DOI or ``available o
 % Appendices (lettered A, B, ... in headers and TOC)
 % -----------------------------------------------------------------------------
 \appendix
-\chapter{Supplementary Material}\label{app:supp}
-\input{Appendix/appendix}
+\chapter{Supplementary Methods}\label{app:A}
+\input{AA/appendixA}
+
+\chapter{Supplementary Figures and Tables}\label{app:B}
+\input{AB/appendixB}
 
 % Bibliography (always last): \bib{bibfile} uses natbib (numeric or harvard per class option)
 % and inserts the License chapter if \license was set.
