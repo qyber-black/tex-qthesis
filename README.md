@@ -3,7 +3,7 @@
 > SPDX-FileCopyrightText: 2026 Frank Langbein <frank@langbein.org>\
 > SPDX-License-Identifier: LPPL-1.3c
 
-The **qthesis** class is a LaTeX class for research degree theses, plus a ready-to-use template. It provides a clean layout (A4, 12pt, 1.5 spacing), optional sans/serif/mixed fonts, numeric or author--year citations, and a compact chapter style. The template suggests a common PhD structure (Introduction, Literature Review, Methods, Results, Discussion, optional Further Analysis, Conclusions and Future Work); chapters and sections can be adapted to the candidate's needs. The template in this directory demonstrates all features and can be filled with your own content.
+The **qthesis** class is a LaTeX class for research degree theses, plus a ready-to-use template. It provides a clean layout (A4, 12pt, 1.5 spacing), optional sans (default), serif, or hacker fonts, numeric or author--year citations, and a compact chapter style. The template suggests a common PhD structure (Introduction, Literature Review, Methods, Results, Discussion, optional Further Analysis, Conclusions and Future Work); chapters and sections can be adapted to the candidate's needs. The template in this directory demonstrates all features and can be filled with your own content.
 
 ## Build
 

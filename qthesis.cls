@@ -29,8 +29,7 @@
 % ------------------------------------------------------------------------------
 % Class options
 % ------------------------------------------------------------------------------
-% Font: mixed (default) = sans-serif text + serif math; sans = all sans-serif;
-%   serif = serif text and math; hacker = typewriter/monospace open-source font throughout.
+% Font: sans (default), serif, or hacker (typewriter/monospace throughout).
 % Layout: oneside (default) or twoside for double-sided printing.
 % Citation: numeric (default) [1], [1,2] or harvard (Author, 2000).
 % Alignment: raggedright (default) = ragged-right; justified = fully justified text.
@@ -39,40 +38,29 @@
 \DeclareOption{raggedright}{\qthesis@justifyfalse}
 \DeclareOption{justified}{\qthesis@justifytrue}
 
-\newif\ifqthesis@font@mixed
 \newif\ifqthesis@font@sans
 \newif\ifqthesis@font@serif
 \newif\ifqthesis@font@hacker
 \newif\ifqthesis@twoside
 \newif\ifqthesis@cite@harvard
 
-\qthesis@font@mixedtrue
-\qthesis@font@sansfalse
+\qthesis@font@sanstrue
 \qthesis@font@seriffalse
 \qthesis@font@hackerfalse
 \qthesis@twosidefalse
 \qthesis@cite@harvardfalse
 
-\DeclareOption{mixed}{%
-  \qthesis@font@mixedtrue
-  \qthesis@font@sansfalse
-  \qthesis@font@seriffalse
-  \qthesis@font@hackerfalse
-}
 \DeclareOption{sans}{%
-  \qthesis@font@mixedfalse
   \qthesis@font@sanstrue
   \qthesis@font@seriffalse
   \qthesis@font@hackerfalse
 }
 \DeclareOption{serif}{%
-  \qthesis@font@mixedfalse
   \qthesis@font@sansfalse
   \qthesis@font@seriftrue
   \qthesis@font@hackerfalse
 }
 \DeclareOption{hacker}{%
-  \qthesis@font@mixedfalse
   \qthesis@font@sansfalse
   \qthesis@font@seriffalse
   \qthesis@font@hackertrue
@@ -310,21 +298,16 @@
 }
 
 % ------------------------------------------------------------------------------
-% Font configuration (depends on class options: mixed, sans, serif, hacker)
+% Font configuration (depends on class options: sans (default), serif, hacker)
 % ------------------------------------------------------------------------------
 \ifPDFTeX
-  \ifqthesis@font@mixed
-    \RequirePackage[default]{sourcesanspro}%
-    \RequirePackage{newtxmath}%
-    \renewcommand{\familydefault}{\sfdefault}%
-  \fi
   \ifqthesis@font@sans
     \RequirePackage[default]{sourcesanspro}%
     \RequirePackage{newtxmath}%
     \renewcommand{\familydefault}{\sfdefault}%
   \fi
   \ifqthesis@font@serif
-    \RequirePackage{newtxtext}%
+    \RequirePackage[default]{sourceserifpro}%
     \RequirePackage{newtxmath}%
   \fi
   \ifqthesis@font@hacker
@@ -333,34 +316,51 @@
     \renewcommand{\familydefault}{\ttdefault}%
   \fi
 \else
-  % XeLaTeX/LuaLaTeX: use fontspec; avoid scaling so 12pt is true document size
+  % XeLaTeX/LuaLaTeX: fontspec. Source Pro if available, else TeX Gyre (XeLaTeX often lacks Source Pro in fontconfig).
   \RequirePackage{fontspec}%
   \defaultfontfeatures{Ligatures=TeX}%
-  \ifqthesis@font@mixed
-    \setmainfont{TeX Gyre Heros}%
-    \setsansfont{TeX Gyre Heros}%
-    \setmonofont{TeX Gyre Cursor}%
-  \fi
   \ifqthesis@font@sans
-    \setmainfont{TeX Gyre Heros}%
-    \setsansfont{TeX Gyre Heros}%
-    \setmonofont{TeX Gyre Cursor}%
+    \IfFontExistsTF{Source Sans Pro}{%
+      \setmainfont{Source Sans Pro}%
+      \setsansfont{Source Sans Pro}%
+      \IfFontExistsTF{Source Code Pro}{%
+        \setmonofont{Source Code Pro}[Scale=MatchLowercase]%
+      }{%
+        \setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]%
+      }%
+    }{%
+      \PackageWarningNoLine{qthesis}{Source Pro not found; using TeX Gyre Heros/Cursor. Install Source Pro or use LuaLaTeX for Source Pro}%
+      \setmainfont{TeX Gyre Heros}%
+      \setsansfont{TeX Gyre Heros}%
+      \setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]%
+    }%
   \fi
   \ifqthesis@font@serif
-    \setmainfont{TeX Gyre Termes}%
-    \setsansfont{TeX Gyre Heros}%
-    \setmonofont{TeX Gyre Cursor}%
+    \IfFontExistsTF{Source Serif Pro}{%
+      \setmainfont{Source Serif Pro}%
+      \setsansfont{Source Sans Pro}[Scale=MatchLowercase]%
+      \IfFontExistsTF{Source Code Pro}{%
+        \setmonofont{Source Code Pro}[Scale=MatchLowercase]%
+      }{%
+        \setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]%
+      }%
+    }{%
+      \PackageWarningNoLine{qthesis}{Source Pro not found; using TeX Gyre Termes/Heros/Cursor. Install Source Pro or use LuaLaTeX for Source Pro}%
+      \setmainfont{TeX Gyre Termes}%
+      \setsansfont{TeX Gyre Heros}[Scale=MatchLowercase]%
+      \setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]%
+    }%
   \fi
   \ifqthesis@font@hacker
     \ifqthesis@noobfuscate
-      \IfFontExistsTF{Fira Mono}{%
-        \setmainfont{Fira Mono}%
-        \setsansfont{Fira Mono}%
-        \setmonofont{Fira Mono}%
-      }{%
+      \IfFontExistsTF{Inconsolata}{%
         \setmainfont{Inconsolata}%
         \setsansfont{Inconsolata}%
         \setmonofont{Inconsolata}%
+      }{%
+        \setmainfont{Fira Mono}%
+        \setsansfont{Fira Mono}%
+        \setmonofont{Fira Mono}%
       }%
     \else
       \ifluatex
@@ -441,20 +441,20 @@
           Obfuscation is supported only with LuaLaTeX.\MessageBreak
           Using normal hacker font (no obfuscation). Use LuaLaTeX for obfuscation.%
         }%
-        \IfFontExistsTF{Fira Mono}{%
-          \setmainfont{Fira Mono}%
-          \setsansfont{Fira Mono}%
-          \setmonofont{Fira Mono}%
-        }{%
+        \IfFontExistsTF{Inconsolata}{%
           \setmainfont{Inconsolata}%
           \setsansfont{Inconsolata}%
           \setmonofont{Inconsolata}%
+        }{%
+          \setmainfont{Fira Mono}%
+          \setsansfont{Fira Mono}%
+          \setmonofont{Fira Mono}%
         }%
       \fi
     \fi
   \fi
   \RequirePackage{unicode-math}%
-  \setmathfont{TeX Gyre Termes Math}[Scale=MatchLowercase]%
+  \setmathfont{Latin Modern Math}[Scale=MatchLowercase]%
 \fi
 
 % ------------------------------------------------------------------------------
