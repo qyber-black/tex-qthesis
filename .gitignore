@@ -24,4 +24,5 @@
 *.fdb_latexmk
 *.synctex.gz
 /main.pdf
+/progress*.pdf
 /fonts/

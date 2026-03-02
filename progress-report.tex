@@ -1,0 +1,210 @@
+% =============================================================================
+% Example PhD progress report using the qreport class
+% =============================================================================
+% This is a standalone, single-file template for PhD progress (and similar)
+% reports. It uses the qreport class, which provides an article-style layout
+% with a compact title block and metadata for the candidate, programme, and
+% reporting period.
+%
+% The structure and headings below are GENERIC. Adapt them to match your own
+% institution's progress review guidance (for example, the COMSC PGR Review
+% Guidance document) by renaming, reordering, or adding sections as needed.
+% This file is only for the narrative report text, not for any administrative
+% forms or approval sheets that your institution may require.
+%
+% If you want to record licensing information for the report itself (for
+% example, a Creative Commons license), you can add a short unnumbered
+% ``License'' section near the end of the document with your preferred text,
+% such as a simple CC-BY or CC-BY-SA notice.
+%
+% Build with lualatex, xelatex, or pdflatex. No other project files are needed
+% apart from an optional .bib file if you use \bib{...} at the end.
+%
+% SPDX-FileCopyrightText: 2026 Frank Langbein <frank@langbein.org>
+% SPDX-License-Identifier: LPPL-1.3c
+%
+
+\documentclass[sans,oneside,numeric,raggedright]{qreport}
+
+% -----------------------------------------------------------------------------
+% Report metadata
+% -----------------------------------------------------------------------------
+
+\title{PhD Progress Report}
+
+% Candidate and programme
+\candidate{Your Name}
+\studentid{1234567}
+\programme{PhD in Computer Science}
+\institution{Your University}
+\school{School of Computer Science}
+
+% Supervisors and report details
+\supervisors{Supervisor One, Supervisor Two}
+\reporttype{Annual Progress Review}
+\reportperiod{1 October 2025 -- 30 September 2026}
+
+% Date (defaults to \today if omitted)
+\date{\today}
+
+% Optional: keywords appear at the end of the abstract environment
+% (if you use \maketitlewithabstract)
+\keywords{progress report; PhD; research degree}
+
+% Optional: useful packages for reports (tables, math, etc.)
+\usepackage{booktabs}
+\usepackage{mathtools}
+\usepackage{siunitx}
+\usepackage{enumitem}
+
+\begin{document}
+
+% Compact, article-style title at top of first page
+\maketitle
+
+% Optionally, you can replace the above with:
+% \maketitlewithabstract{%
+%   Provide a short summary of the reporting period: key achievements,
+%   main results, and overall status. Keep this to one paragraph if your
+%   institution expects a brief overview at the start of the report.
+% }
+
+% =============================================================================
+% Suggested section structure
+% =============================================================================
+% The sections below reflect a typical PhD progress report. Adapt headings,
+% order, and level of detail to match your local requirements and review
+% forms. You can merge or split sections (e.g. combining Outputs with
+% Research Activities) as appropriate.
+
+\section{Summary of progress}
+
+\newthought{This section provides a concise overview of your year.}
+Summarise the reporting period in a few paragraphs. Highlight the main
+achievements since the last report, your current overall status (on track,
+ahead, behind schedule), and any major changes in direction or scope.
+
+\section{Research activities and results}
+
+Describe the research you have carried out during the period. Depending on
+your project, you might organise this by research question, work package,
+experiment, or theoretical component.
+
+\subsection{Work completed}
+
+Outline the main tasks completed (e.g.\ literature study, theoretical
+development, software implementation, experimental design, data collection,
+analysis). Be specific enough that reviewers can see clear progress.
+
+\subsection{Results and findings}
+
+Summarise the key findings so far. This can include preliminary results,
+negative results, or partial analyses. If appropriate, refer to figures,
+tables, or appendices that document results more fully.
+
+\section{Outputs and dissemination}
+
+List publications, submissions, preprints, talks, posters, software, and
+datasets arising from your work during this period (and, if helpful, earlier
+work that is directly relevant to the thesis). You can use an itemised list
+or a table.
+
+\begin{itemize}[leftmargin=2em]
+  \item Journal article or conference paper (published, accepted, submitted,
+        or in preparation), with a short note on status.
+  \item Talks, posters, and demos given at conferences, seminars, or internal
+        events.
+  \item Software, code, or data releases (e.g.\ Git repositories, DOIs).
+\end{itemize}
+
+If you maintain a bibliography file, you can also cite outputs here using
+standard \texttt{natbib} commands (e.g.\ \verb|\citep|, \verb|\citet|).
+
+\section{Training and professional development}
+
+Describe any formal or informal training undertaken during the period.
+Typical examples include:
+
+\begin{itemize}[leftmargin=2em]
+  \item Research methods courses and technical workshops.
+  \item Generic skills training (writing, presenting, teaching, project
+        management, statistics, etc.).
+  \item Teaching, demonstrating, or supervision activities.
+  \item Outreach, public engagement, or professional service.
+\end{itemize}
+
+Comment briefly on how these activities support your research and your
+longer-term development.
+
+\section{Plan for the next period}
+
+Provide a concrete plan for the next reporting period. Align this plan
+with your thesis timeline or Gantt chart if you have one.
+
+\begin{itemize}[leftmargin=2em]
+  \item State your main objectives and milestones for the next period.
+  \item Indicate any dependencies or sequencing (e.g.\ data collection
+        before analysis, method development before experiments).
+  \item Note where work will continue existing strands versus starting new
+        directions.
+\end{itemize}
+
+You can optionally include a table or bullet list mapping planned tasks to
+time periods (months or semesters).
+
+\section{Risks, challenges, and mitigation}
+
+Discuss any risks or challenges affecting your progress. These might include
+technical difficulties, resource constraints, access to data or equipment,
+changes in supervision, or personal circumstances (describe only at the level
+of detail you are comfortable sharing in an academic report).
+
+For each significant risk or challenge, outline:
+
+\begin{itemize}[leftmargin=2em]
+  \item Its impact on your project and timeline.
+  \item Steps already taken to address it.
+  \item Planned mitigation or contingency measures.
+\end{itemize}
+
+\section{Additional information}
+
+Include here any information that does not fit naturally in the earlier
+sections but is requested by your institution's progress review forms (for
+example, ethical approvals, data management plans, or specific questions
+about supervision or resources).
+
+You can also use this section to record agreed changes to your project
+scope or thesis structure, if these are part of the review.
+
+% =============================================================================
+% Optional bibliography
+% =============================================================================
+% If your institution expects references in the progress report (for example,
+% when you cite key background work or your own published outputs), include a
+% .bib file and uncomment the lines below. Replace ``references'' with the
+% name of your .bib file (without the .bib extension).
+%
+% \bibliographystyle{plainnat} is selected automatically by \bib{...} for
+% numeric citations, or agsm for harvard-style citations.
+
+% \clearpage
+% \bib{references}
+
+% =============================================================================
+% Optional license information
+% =============================================================================
+% If you need to state a license for the report content (for example, that it
+% is released under a Creative Commons license), you can add a short unnumbered
+% section such as:
+%
+% \section*{License}
+% This report is licensed under the Creative Commons Attribution-ShareAlike 4.0
+% International License (CC BY-SA 4.0). You are free to share and adapt the
+% material under the terms of that license.
+%
+% Adjust the wording and license choice to match your needs or your
+% institution's recommendations.
+
+\end{document}
+

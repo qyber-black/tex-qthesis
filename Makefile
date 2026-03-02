@@ -10,6 +10,10 @@
 # SPDX-License-Identifier: LPPL-1.3c
 
 MAIN = main
+# Progress/report documents built with the qreport class. Add more filenames
+# (without .tex extension) as needed, e.g. REPORTS = progress-report midterm-report
+REPORTS ?= progress-report
+
 ENGINE ?= lua
 # Seed used for obfuscated fonts. Override with `make hacker-font SEED=...`.
 # If not provided, we pick a timestamp seed so all generated fonts share one permutation.
@@ -26,13 +30,14 @@ all: $(MAIN).pdf
 # ------------------------------------------------------------------------------
 help:
 	@echo "qthesis template Makefile targets:"
-	@echo "  make [all]     Build $(MAIN).pdf (default)."
-	@echo "  make help      Show this help."
-	@echo "  make clean    Remove build artifacts (keep PDF)."
-	@echo "  make distclean  clean + remove $(MAIN).pdf"
-	@echo "  make hacker-font  Generate obfuscated font and permutation (default: hacker; optional SEED=n). See README for sans/serif."
-	@echo "  make wordcount  Per-file and total word count (captions shown separately)."
-	@echo "  make check    Run quality checks (REUSE lint, optional thesis-specific)."
+	@echo "  make [all]       Build $(MAIN).pdf (default)."
+	@echo "  make reports     Build all progress reports in REPORTS (default: $(REPORTS))."
+	@echo "  make help        Show this help."
+	@echo "  make clean       Remove build artifacts (keep PDFs)."
+	@echo "  make distclean   clean + remove $(MAIN).pdf and fonts/."
+	@echo "  make hacker-font Generate obfuscated font and permutation (default: hacker; optional SEED=n). See README for sans/serif."
+	@echo "  make wordcount   Per-file and total word count (captions shown separately)."
+	@echo "  make check       Run quality checks (REUSE lint, optional thesis-specific)."
 	@echo ""
 	@echo "Engine: make ENGINE=lua (default) | ENGINE=pdf | ENGINE=xe"
 
@@ -52,7 +57,7 @@ endif
 
 LATEXMK = latexmk
 
-.PHONY: clean distclean wordcount check help hacker-font
+.PHONY: clean distclean wordcount check help hacker-font reports
 
 # ------------------------------------------------------------------------------
 # Obfuscation: generate permuted fonts + permutation table
@@ -121,6 +126,18 @@ $(MAIN).pdf: $(MAIN).tex qthesis.cls bibliography.bib acronyms.tex \
 	$(LATEXMK) $(LATEXMK_ENGINE) $(LATEXMK_CMD) $(MAIN)
 	-makeglossaries $(MAIN)
 	$(LATEXMK) $(LATEXMK_ENGINE) $(LATEXMK_CMD) $(MAIN)
+
+# ------------------------------------------------------------------------------
+# Progress reports (qreport-based, single-file documents)
+# ------------------------------------------------------------------------------
+
+# Pattern rule: build any <name>.pdf from <name>.tex using latexmk.
+# This is suitable for qreport-based documents such as progress reports.
+%.pdf: %.tex qreport.cls
+	$(LATEXMK) $(LATEXMK_ENGINE) $(LATEXMK_CMD) $*
+
+# Build all configured reports: REPORTS = progress-report [more names ...]
+reports: $(REPORTS:%=%.pdf)
 
 clean:
 	$(LATEXMK) -c $(MAIN)
