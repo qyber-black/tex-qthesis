@@ -67,7 +67,7 @@
 }
 
 \newif\ifqthesis@noobfuscate
-\qthesis@noobfuscatefalse
+\qthesis@noobfuscatetrue
 \DeclareOption{noobfuscate}{\qthesis@noobfuscatetrue}
 \DeclareOption{obfuscate}{\qthesis@noobfuscatefalse}
 
@@ -316,42 +316,216 @@
     \renewcommand{\familydefault}{\ttdefault}%
   \fi
 \else
-  % XeLaTeX/LuaLaTeX: fontspec. Source Pro if available, else TeX Gyre (XeLaTeX often lacks Source Pro in fontconfig).
+  % XeLaTeX/LuaLaTeX: fontspec. Source Pro if available, else TeX Gyre. Obfuscation (option obfuscate) is decoupled from font choice: register once when obfuscate+LuaLaTeX, then load per-font obfuscated file (sans/serif/hacker).
   \RequirePackage{fontspec}%
   \defaultfontfeatures{Ligatures=TeX}%
-  \ifqthesis@font@sans
-    \IfFontExistsTF{Source Sans Pro}{%
-      \setmainfont{Source Sans Pro}%
-      \setsansfont{Source Sans Pro}%
-      \IfFontExistsTF{Source Code Pro}{%
-        \setmonofont{Source Code Pro}[Scale=MatchLowercase]%
+  \ifluatex
+    \ifqthesis@noobfuscate \else
+      \IfFileExists{fonts/obfuscate-perm.lua}{%
+        \directlua{%
+          local perm = dofile("fonts/obfuscate-perm.lua")
+          local PUA = 0xE000
+          luatexbase.add_to_callback("luaotfload.patch_font", function(tfmdata)
+            if not tfmdata or not tfmdata.characters then return end
+            if not tfmdata.characters[PUA] then return end
+            if tfmdata.characters[0x41] then return end
+            tfmdata.embedding = "full"
+            tfmdata.qthesis_obfuscated = true
+            for c = 0, 255 do
+              local src = PUA + perm[c]
+              if tfmdata.characters[src] then
+                tfmdata.characters[c] = tfmdata.characters[src]
+              end
+            end
+            for c = 0, 255 do
+              local slot = PUA + perm[c]
+              if tfmdata.characters[slot] then
+                tfmdata.characters[slot].unicode = slot
+                tfmdata.characters[slot].tounicode = slot
+              end
+            end
+          end, "qthesis_obfuscate_full_embed")
+        }%
+        \AtBeginDocument{%
+          \directlua{%
+            local perm = dofile("fonts/obfuscate-perm.lua")
+            local PUA = 0xE000
+            local hlist_id = node.id("hlist")
+            local vlist_id = node.id("vlist")
+            local function obfuscate_glyphs(head)
+              for n in node.traverse(head) do
+                if n.id == node.id("glyph") then
+                  local tfm = fonts.hashes.identifiers[n.font]
+                  if tfm and tfm.qthesis_obfuscated and n.char >= 0 and n.char <= 255 and perm[n.char] then
+                    n.char = PUA + perm[n.char]
+                  end
+                elseif (n.id == hlist_id or n.id == vlist_id) and n.head then
+                  obfuscate_glyphs(n.head)
+                end
+              end
+              return head
+            end
+            luatexbase.add_to_callback("pre_linebreak_filter", obfuscate_glyphs, "qthesis_obfuscate")
+            luatexbase.add_to_callback("pre_output_filter", obfuscate_glyphs, "qthesis_obfuscate")
+          }%
+        }%
       }{%
+        \PackageError{qthesis}{%
+          Obfuscation requires fonts/obfuscate-perm.lua.\MessageBreak
+          Generate it with the build script (see README).%
+        }{%
+          Then re-run LaTeX.%
+        }%
+      }%
+    \fi
+  \else
+    \ifqthesis@noobfuscate \else
+      \PackageWarningNoLine{qthesis}{Obfuscation is LuaLaTeX-only; using normal fonts}%
+    \fi
+  \fi
+  \ifqthesis@font@sans
+    \ifluatex \ifqthesis@noobfuscate \else
+      \IfFileExists{fonts/sans-obfuscated.otf}{%
+        \def\qthesis@obf@opts{Path=fonts/,Extension=.otf}%
+        \IfFileExists{fonts/sans-obfuscated-Bold.otf}{\g@addto@macro\qthesis@obf@opts{,BoldFont=sans-obfuscated-Bold}}{}%
+        \IfFileExists{fonts/sans-obfuscated-Italic.otf}{\g@addto@macro\qthesis@obf@opts{,ItalicFont=sans-obfuscated-Italic}}{}%
+        \IfFileExists{fonts/sans-obfuscated-BoldItalic.otf}{\g@addto@macro\qthesis@obf@opts{,BoldItalicFont=sans-obfuscated-BoldItalic}}{}%
+        \IfFileExists{fonts/sans-obfuscated-SmallCaps.otf}{\g@addto@macro\qthesis@obf@opts{,SmallCapsFont=sans-obfuscated-SmallCaps}}{}%
+        \IfFileExists{fonts/sans-obfuscated-Slanted.otf}{\g@addto@macro\qthesis@obf@opts{,SlantedFont=sans-obfuscated-Slanted}}{}%
+        \setmainfont{sans-obfuscated}[\qthesis@obf@opts]%
+        \setsansfont{sans-obfuscated}[\qthesis@obf@opts]%
+        \setmonofont{sans-obfuscated}[\qthesis@obf@opts]%
+        \renewcommand{\labelitemi}{\normalfont\char"B7}%
+        \renewcommand{\labelitemii}{\normalfont\char"B7}%
+        \renewcommand{\labelitemiii}{\normalfont\char"B7}%
+        \renewcommand{\labelitemiv}{\normalfont\char"B7}%
+      }{%
+        \PackageError{qthesis}{%
+          Obfuscation requires fonts/sans-obfuscated.otf.\MessageBreak
+          Generate it with the build script (see README).%
+        }{%
+          Then re-run LaTeX.%
+        }%
+      }%
+    \fi \fi
+    \ifqthesis@noobfuscate
+      \IfFontExistsTF{Source Sans Pro}{%
+        \setmainfont{Source Sans Pro}%
+        \setsansfont{Source Sans Pro}%
+        \IfFontExistsTF{Source Code Pro}{%
+          \setmonofont{Source Code Pro}[Scale=MatchLowercase]%
+        }{%
+          \setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]%
+        }%
+      }{%
+        \PackageWarningNoLine{qthesis}{Source Pro not found; using TeX Gyre Heros/Cursor. Install Source Pro or use LuaLaTeX for Source Pro}%
+        \setmainfont{TeX Gyre Heros}%
+        \setsansfont{TeX Gyre Heros}%
         \setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]%
       }%
-    }{%
-      \PackageWarningNoLine{qthesis}{Source Pro not found; using TeX Gyre Heros/Cursor. Install Source Pro or use LuaLaTeX for Source Pro}%
-      \setmainfont{TeX Gyre Heros}%
-      \setsansfont{TeX Gyre Heros}%
-      \setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]%
-    }%
+    \else
+      \ifluatex \else
+        \IfFontExistsTF{Source Sans Pro}{%
+          \setmainfont{Source Sans Pro}%
+          \setsansfont{Source Sans Pro}%
+          \IfFontExistsTF{Source Code Pro}{%
+            \setmonofont{Source Code Pro}[Scale=MatchLowercase]%
+          }{%
+            \setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]%
+          }%
+        }{%
+          \PackageWarningNoLine{qthesis}{Source Pro not found; using TeX Gyre Heros/Cursor}%
+          \setmainfont{TeX Gyre Heros}%
+          \setsansfont{TeX Gyre Heros}%
+          \setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]%
+        }%
+      \fi
+    \fi
   \fi
   \ifqthesis@font@serif
-    \IfFontExistsTF{Source Serif Pro}{%
-      \setmainfont{Source Serif Pro}%
-      \setsansfont{Source Sans Pro}[Scale=MatchLowercase]%
-      \IfFontExistsTF{Source Code Pro}{%
-        \setmonofont{Source Code Pro}[Scale=MatchLowercase]%
+    \ifluatex \ifqthesis@noobfuscate \else
+      \IfFileExists{fonts/serif-obfuscated.otf}{%
+        \def\qthesis@obf@opts{Path=fonts/,Extension=.otf}%
+        \IfFileExists{fonts/serif-obfuscated-Bold.otf}{\g@addto@macro\qthesis@obf@opts{,BoldFont=serif-obfuscated-Bold}}{}%
+        \IfFileExists{fonts/serif-obfuscated-Italic.otf}{\g@addto@macro\qthesis@obf@opts{,ItalicFont=serif-obfuscated-Italic}}{}%
+        \IfFileExists{fonts/serif-obfuscated-BoldItalic.otf}{\g@addto@macro\qthesis@obf@opts{,BoldItalicFont=serif-obfuscated-BoldItalic}}{}%
+        \IfFileExists{fonts/serif-obfuscated-SmallCaps.otf}{\g@addto@macro\qthesis@obf@opts{,SmallCapsFont=serif-obfuscated-SmallCaps}}{}%
+        \IfFileExists{fonts/serif-obfuscated-Slanted.otf}{\g@addto@macro\qthesis@obf@opts{,SlantedFont=serif-obfuscated-Slanted}}{}%
+        \setmainfont{serif-obfuscated}[\qthesis@obf@opts]%
+        \setsansfont{serif-obfuscated}[\qthesis@obf@opts]%
+        \setmonofont{serif-obfuscated}[\qthesis@obf@opts]%
+        \renewcommand{\labelitemi}{\normalfont\char"B7}%
+        \renewcommand{\labelitemii}{\normalfont\char"B7}%
+        \renewcommand{\labelitemiii}{\normalfont\char"B7}%
+        \renewcommand{\labelitemiv}{\normalfont\char"B7}%
       }{%
+        \PackageError{qthesis}{%
+          Obfuscation requires fonts/serif-obfuscated.otf.\MessageBreak
+          Generate it with the build script (see README).%
+        }{%
+          Then re-run LaTeX.%
+        }%
+      }%
+    \fi \fi
+    \ifqthesis@noobfuscate
+      \IfFontExistsTF{Source Serif Pro}{%
+        \setmainfont{Source Serif Pro}%
+        \setsansfont{Source Sans Pro}[Scale=MatchLowercase]%
+        \IfFontExistsTF{Source Code Pro}{%
+          \setmonofont{Source Code Pro}[Scale=MatchLowercase]%
+        }{%
+          \setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]%
+        }%
+      }{%
+        \PackageWarningNoLine{qthesis}{Source Pro not found; using TeX Gyre Termes/Heros/Cursor}%
+        \setmainfont{TeX Gyre Termes}%
+        \setsansfont{TeX Gyre Heros}[Scale=MatchLowercase]%
         \setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]%
       }%
-    }{%
-      \PackageWarningNoLine{qthesis}{Source Pro not found; using TeX Gyre Termes/Heros/Cursor. Install Source Pro or use LuaLaTeX for Source Pro}%
-      \setmainfont{TeX Gyre Termes}%
-      \setsansfont{TeX Gyre Heros}[Scale=MatchLowercase]%
-      \setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]%
-    }%
+    \else
+      \ifluatex \else
+        \IfFontExistsTF{Source Serif Pro}{%
+          \setmainfont{Source Serif Pro}%
+          \setsansfont{Source Sans Pro}[Scale=MatchLowercase]%
+          \IfFontExistsTF{Source Code Pro}{%
+            \setmonofont{Source Code Pro}[Scale=MatchLowercase]%
+          }{%
+            \setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]%
+          }%
+        }{%
+          \PackageWarningNoLine{qthesis}{Source Pro not found; using TeX Gyre Termes/Heros/Cursor}%
+          \setmainfont{TeX Gyre Termes}%
+          \setsansfont{TeX Gyre Heros}[Scale=MatchLowercase]%
+          \setmonofont{TeX Gyre Cursor}[Scale=MatchLowercase]%
+        }%
+      \fi
+    \fi
   \fi
   \ifqthesis@font@hacker
+    \ifluatex \ifqthesis@noobfuscate \else
+      \IfFileExists{fonts/hacker-obfuscated.otf}{%
+        \def\qthesis@obf@opts{Path=fonts/,Extension=.otf}%
+        \IfFileExists{fonts/hacker-obfuscated-Bold.otf}{\g@addto@macro\qthesis@obf@opts{,BoldFont=hacker-obfuscated-Bold}}{}%
+        \IfFileExists{fonts/hacker-obfuscated-Italic.otf}{\g@addto@macro\qthesis@obf@opts{,ItalicFont=hacker-obfuscated-Italic}}{}%
+        \IfFileExists{fonts/hacker-obfuscated-BoldItalic.otf}{\g@addto@macro\qthesis@obf@opts{,BoldItalicFont=hacker-obfuscated-BoldItalic}}{}%
+        \IfFileExists{fonts/hacker-obfuscated-SmallCaps.otf}{\g@addto@macro\qthesis@obf@opts{,SmallCapsFont=hacker-obfuscated-SmallCaps}}{}%
+        \IfFileExists{fonts/hacker-obfuscated-Slanted.otf}{\g@addto@macro\qthesis@obf@opts{,SlantedFont=hacker-obfuscated-Slanted}}{}%
+        \setmainfont{hacker-obfuscated}[\qthesis@obf@opts]%
+        \setsansfont{hacker-obfuscated}[\qthesis@obf@opts]%
+        \setmonofont{hacker-obfuscated}[\qthesis@obf@opts]%
+        \renewcommand{\labelitemi}{\normalfont\char"B7}%
+        \renewcommand{\labelitemii}{\normalfont\char"B7}%
+        \renewcommand{\labelitemiii}{\normalfont\char"B7}%
+        \renewcommand{\labelitemiv}{\normalfont\char"B7}%
+      }{%
+        \PackageError{qthesis}{%
+          Obfuscation requires fonts/hacker-obfuscated.otf.\MessageBreak
+          Generate it with the build script (see README).%
+        }{%
+          Then re-run LaTeX.%
+        }%
+      }%
+    \fi \fi
     \ifqthesis@noobfuscate
       \IfFontExistsTF{Inconsolata}{%
         \setmainfont{Inconsolata}%
@@ -363,80 +537,7 @@
         \setmonofont{Fira Mono}%
       }%
     \else
-      \ifluatex
-        \IfFileExists{fonts/hacker-obfuscated.otf}{%
-          \IfFileExists{fonts/obfuscate-perm.lua}{%
-            \directlua{%
-              local perm = dofile("fonts/obfuscate-perm.lua")
-              local PUA = 0xE000
-              luatexbase.add_to_callback("luaotfload.patch_font", function(tfmdata)
-                if not tfmdata or not tfmdata.characters then return end
-                if not tfmdata.characters[PUA] then return end
-                if tfmdata.characters[0x41] then return end
-                tfmdata.embedding = "full"
-                tfmdata.qthesis_obfuscated = true
-                for c = 0, 255 do
-                  local src = PUA + perm[c]
-                  if tfmdata.characters[src] then
-                    tfmdata.characters[c] = tfmdata.characters[src]
-                  end
-                end
-                for c = 0, 255 do
-                  local slot = PUA + perm[c]
-                  if tfmdata.characters[slot] then
-                    tfmdata.characters[slot].unicode = slot
-                    tfmdata.characters[slot].tounicode = slot
-                  end
-                end
-              end, "qthesis_obfuscate_full_embed")
-            }%
-            \setmainfont{hacker-obfuscated}[Path=fonts/,Extension=.otf]%
-            \setsansfont{hacker-obfuscated}[Path=fonts/,Extension=.otf]%
-            \setmonofont{hacker-obfuscated}[Path=fonts/,Extension=.otf]%
-            \renewcommand{\labelitemi}{\normalfont\char"B7}%
-            \renewcommand{\labelitemii}{\normalfont\char"B7}%
-            \renewcommand{\labelitemiii}{\normalfont\char"B7}%
-            \renewcommand{\labelitemiv}{\normalfont\char"B7}%
-            \AtBeginDocument{%
-              \directlua{%
-                local perm = dofile("fonts/obfuscate-perm.lua")
-                local PUA = 0xE000
-                local hlist_id = node.id("hlist")
-                local vlist_id = node.id("vlist")
-                local function obfuscate_glyphs(head)
-                  for n in node.traverse(head) do
-                    if n.id == node.id("glyph") then
-                      local tfm = fonts.hashes.identifiers[n.font]
-                      if tfm and tfm.qthesis_obfuscated and n.char >= 0 and n.char <= 255 and perm[n.char] then
-                        n.char = PUA + perm[n.char]
-                      end
-                    elseif (n.id == hlist_id or n.id == vlist_id) and n.head then
-                      obfuscate_glyphs(n.head)
-                    end
-                  end
-                  return head
-                end
-                luatexbase.add_to_callback("pre_linebreak_filter", obfuscate_glyphs, "qthesis_obfuscate")
-                luatexbase.add_to_callback("pre_output_filter", obfuscate_glyphs, "qthesis_obfuscate")
-              }%
-            }%
-          }{%
-            \PackageError{qthesis}{%
-              Obfuscation requires fonts/obfuscate-perm.lua.\MessageBreak
-              Run 'make hacker-font' first (see README).%
-            }{%
-              Then re-run LaTeX.%
-            }%
-          }%
-        }{%
-          \PackageError{qthesis}{%
-            Obfuscation requires fonts/hacker-obfuscated.otf.\MessageBreak
-            Run 'make hacker-font' first (see README).%
-          }{%
-            Then re-run LaTeX.%
-          }%
-        }%
-      \else
+      \ifluatex \else
         \PackageWarning{qthesis}{%
           Obfuscation is supported only with LuaLaTeX.\MessageBreak
           Using normal hacker font (no obfuscation). Use LuaLaTeX for obfuscation.%

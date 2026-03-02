@@ -11,6 +11,9 @@
 
 MAIN = main
 ENGINE ?= lua
+# Seed used for obfuscated fonts. Override with `make hacker-font SEED=...`.
+# If not provided, we pick a timestamp seed so all generated fonts share one permutation.
+SEED ?= $(shell date +%s)
 
 # ------------------------------------------------------------------------------
 # Default: build (first target). Run "make help" for all targets.
@@ -27,7 +30,7 @@ help:
 	@echo "  make help      Show this help."
 	@echo "  make clean    Remove build artifacts (keep PDF)."
 	@echo "  make distclean  clean + remove $(MAIN).pdf"
-	@echo "  make hacker-font  Generate local obfuscated font for hacker option (run once; optional SEED=n)."
+	@echo "  make hacker-font  Generate obfuscated font and permutation (default: hacker; optional SEED=n). See README for sans/serif."
 	@echo "  make wordcount  Per-file and total word count (captions shown separately)."
 	@echo "  make check    Run quality checks (REUSE lint, optional thesis-specific)."
 	@echo ""
@@ -51,11 +54,67 @@ LATEXMK = latexmk
 
 .PHONY: clean distclean wordcount check help hacker-font
 
-# Hacker obfuscation: generate local permuted font and permutation table (different per run unless SEED set)
+# ------------------------------------------------------------------------------
+# Obfuscation: generate permuted fonts + permutation table
+#
+# This builds the obfuscated fonts used by the `obfuscate` class option:
+# - fonts/sans-obfuscated*.otf
+# - fonts/serif-obfuscated*.otf
+# - fonts/hacker-obfuscated*.otf
+#
+# All files MUST share the same SEED so they all match the same obfuscation
+# permutation table (fonts/obfuscate-perm.lua).
+# ------------------------------------------------------------------------------
+OBF_OUT_DIR := fonts
+
+SANS_SRC_REG := $(shell kpsewhich SourceSansPro-Regular.otf)
+SANS_SRC_BOLD := $(shell kpsewhich SourceSansPro-Bold.otf)
+SANS_SRC_ITALIC := $(shell kpsewhich SourceSansPro-RegularIt.otf)
+SANS_SRC_BOLDITALIC := $(shell kpsewhich SourceSansPro-BoldIt.otf)
+ifeq ($(SANS_SRC_REG),)
+  SANS_SRC_REG := $(shell kpsewhich texgyreheros-regular.otf)
+  SANS_SRC_BOLD := $(shell kpsewhich texgyreheros-bold.otf)
+  SANS_SRC_ITALIC := $(shell kpsewhich texgyreheros-italic.otf)
+  SANS_SRC_BOLDITALIC := $(shell kpsewhich texgyreheros-bolditalic.otf)
+endif
+
+SERIF_SRC_REG := $(shell kpsewhich SourceSerifPro-Regular.otf)
+SERIF_SRC_BOLD := $(shell kpsewhich SourceSerifPro-Bold.otf)
+SERIF_SRC_ITALIC := $(shell kpsewhich SourceSerifPro-RegularIt.otf)
+SERIF_SRC_BOLDITALIC := $(shell kpsewhich SourceSerifPro-BoldIt.otf)
+ifeq ($(SERIF_SRC_REG),)
+  SERIF_SRC_REG := $(shell kpsewhich texgyretermes-regular.otf)
+  SERIF_SRC_BOLD := $(shell kpsewhich texgyretermes-bold.otf)
+  SERIF_SRC_ITALIC := $(shell kpsewhich texgyretermes-italic.otf)
+  SERIF_SRC_BOLDITALIC := $(shell kpsewhich texgyretermes-bolditalic.otf)
+endif
+
+# Prefer Inconsolata if available, else Fira Mono (both are commonly present in TeX Live)
+HACKER_SRC_REG := $(firstword $(shell kpsewhich Inconsolata-Regular.otf Inconsolata-Regular.ttf inconsolata-regular.otf inconsolata-regular.ttf FiraMono-Regular.otf FiraMono-Regular.ttf))
+HACKER_SRC_BOLD := $(firstword $(shell kpsewhich Inconsolata-Bold.otf Inconsolata-Bold.ttf inconsolata-bold.otf inconsolata-bold.ttf FiraMono-Bold.otf FiraMono-Bold.ttf))
+
+define obfuscate_font
+	@if [ -n "$(1)" ]; then \
+	  python3 scripts/build-hacker-font.py --output-dir "$(OBF_OUT_DIR)" --seed "$(SEED)" --font "$(1)" --output-font "$(2)"; \
+	else \
+	  echo "Skipping $(2) (missing source font)"; \
+	fi
+endef
+
 hacker-font:
-	@mkdir -p fonts
-	$(if $(SEED),python3 scripts/build-hacker-font.py --output-dir fonts --seed $(SEED),python3 scripts/build-hacker-font.py --output-dir fonts)
-	@echo "Run 'make' with document class option 'hacker' (and ENGINE=lua) to use obfuscation."
+	@mkdir -p "$(OBF_OUT_DIR)"
+	@echo "Generating obfuscated fonts into $(OBF_OUT_DIR) (SEED=$(SEED))"
+	$(call obfuscate_font,$(SANS_SRC_REG),sans-obfuscated.otf)
+	$(call obfuscate_font,$(SANS_SRC_BOLD),sans-obfuscated-Bold.otf)
+	$(call obfuscate_font,$(SANS_SRC_ITALIC),sans-obfuscated-Italic.otf)
+	$(call obfuscate_font,$(SANS_SRC_BOLDITALIC),sans-obfuscated-BoldItalic.otf)
+	$(call obfuscate_font,$(SERIF_SRC_REG),serif-obfuscated.otf)
+	$(call obfuscate_font,$(SERIF_SRC_BOLD),serif-obfuscated-Bold.otf)
+	$(call obfuscate_font,$(SERIF_SRC_ITALIC),serif-obfuscated-Italic.otf)
+	$(call obfuscate_font,$(SERIF_SRC_BOLDITALIC),serif-obfuscated-BoldItalic.otf)
+	$(call obfuscate_font,$(HACKER_SRC_REG),hacker-obfuscated.otf)
+	$(call obfuscate_font,$(HACKER_SRC_BOLD),hacker-obfuscated-Bold.otf)
+	@echo "Done. Use class option 'obfuscate' with font=sans, serif, or hacker (ENGINE=lua). See README."
 
 $(MAIN).pdf: $(MAIN).tex qthesis.cls bibliography.bib acronyms.tex \
 	C*/chapter*.tex A*/appendix*.tex

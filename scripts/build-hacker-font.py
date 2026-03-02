@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-# Build a permuted (obfuscated) font and permutation table for the hacker class option.
-# Output: fonts/hacker-obfuscated.otf, fonts/obfuscate-perm.lua
-# Usage: python3 scripts/build-hacker-font.py [--seed N] [--font PATH] [--output-dir DIR]
+# Build a permuted (obfuscated) font and permutation table for the obfuscate class option.
+# Can build obfuscated fonts for sans, serif, or hacker (any input font), including each
+# variant (Regular, Bold, Italic, BoldItalic, SmallCaps, Slanted). Use the same --seed
+# for all runs so all fonts share obfuscate-perm.lua.
+# Output: fonts/<output-font>, fonts/obfuscate-perm.lua
+# Usage: python3 scripts/build-hacker-font.py [--seed N] [--font PATH] [--output-dir DIR] [--output-font NAME.otf]
 #
 # SPDX-FileCopyrightText: 2026 Frank Langbein <frank@langbein.org>
 # SPDX-License-Identifier: LPPL-1.3c
@@ -122,6 +125,7 @@ def main():
     ap.add_argument("--seed", type=int, default=None, help="Random seed for reproducible permutation")
     ap.add_argument("--font", type=str, default=None, help="Path to input font (Inconsolata or Fira Mono)")
     ap.add_argument("--output-dir", type=str, default="fonts", help="Output directory (default: fonts)")
+    ap.add_argument("--output-font", type=str, default="hacker-obfuscated.otf", help="Output font filename (default: hacker-obfuscated.otf)")
     args = ap.parse_args()
 
     font_path = args.font
@@ -137,7 +141,7 @@ def main():
     print(f"Using font: {font_path}")
     perm = generate_permutation(args.seed)
     out_dir = Path(args.output_dir)
-    build_permuted_font(font_path, perm, out_dir / "hacker-obfuscated.otf")
+    build_permuted_font(font_path, perm, out_dir / args.output_font)
     write_perm_lua(perm, out_dir / "obfuscate-perm.lua")
 
 

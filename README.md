@@ -23,6 +23,13 @@ The Makefile uses **latexmk** to run the LaTeX engine, bibliography, and cross-r
 
 You need **latexmk**, **lualatex** (or pdflatex/xelatex if you switch engine), **makeglossaries** (for acronyms), and **bibtex** (for the bibliography). Install them via your distribution (TeX Live, MiKTeX, etc.).
 
+## Fonts and obfuscation
+
+- Class option **`obfuscate`** enables font obfuscation for any font (sans, serif, or hacker). Requires **LuaLaTeX**; with XeLaTeX or pdfLaTeX a warning is emitted and normal fonts are used.
+- Generate obfuscated fonts with the build script. Default **`make hacker-font`** produces `fonts/hacker-obfuscated.otf` and `fonts/obfuscate-perm.lua` (use optional **`SEED=n`** for a reproducible permutation).
+- To use obfuscation with **sans** or **serif**, run the script with the same **`--seed`** (e.g. same `SEED=` when using make), **`--font`** path to the base font (e.g. Source Sans Pro or Source Serif Pro), and **`--output-font sans-obfuscated.otf`** or **`serif-obfuscated.otf`**. Example: `python3 scripts/build-hacker-font.py --output-dir fonts --seed 42 --font /path/to/SourceSansPro-Regular.otf --output-font sans-obfuscated.otf`.
+- For full obfuscation (including **\textbf**, **\textit**, and **\textsc** used in the class), generate all variants per family with the **same seed**: Regular, Bold, Italic, BoldItalic (e.g. `sans-obfuscated.otf`, `sans-obfuscated-Bold.otf`, `sans-obfuscated-Italic.otf`, `sans-obfuscated-BoldItalic.otf`). Optionally SmallCaps (used in newthought, headers, chapter titles) or Slanted if your font provides them. Expected files: `fonts/<base>.otf`, `fonts/<base>-Bold.otf`, `fonts/<base>-Italic.otf`, `fonts/<base>-BoldItalic.otf`, and `fonts/obfuscate-perm.lua` (shared).
+
 ## Quality checks
 
 Run `make check` to run REUSE lint (license and copyright compliance; see [REUSE](https://reuse.software)). This project is REUSE-compliant (SPDX headers in source files, `LICENSES/LPPL-1.3c.txt`, `REUSE.toml` for `bibliography.bib` which cannot hold SPDX headers). If the `reuse` tool is not installed, the target reports that. You can extend the Makefile `check` target with thesis-specific checks (e.g. validating numbers against data sources, or scripts that regenerate tables from data and ensure the document is in sync).
