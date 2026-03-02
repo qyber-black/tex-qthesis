@@ -525,7 +525,7 @@
       \lineskip .5em
       \ifx\qreport@candidate\@empty
       \else
-        \qreport@candidate
+        \qreport@candidate\par
       \fi
     }%
     \vspace{0.75ex}%
