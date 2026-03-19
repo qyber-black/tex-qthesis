@@ -257,10 +257,10 @@
 
 % Glossaries: if you define acronyms with \newacronym, a List of Acronyms is
 % included in the front matter. Default style: long-short (first use: ``long (short)'',
-% later: short). Build: pdflatex, then makeglossaries (or makeindex), then pdflatex again.
+% later: short). Build (when acronyms are used): pdflatex, then makeglossaries
+% (or makeindex), then pdflatex again.
 \RequirePackage[acronym,nomain,toc]{glossaries}% nomain: we only use acronyms, not the main glossary
 \setacronymstyle{long-short}% First use: full form (abbreviation); later: abbreviation only
-\makeglossaries
 \newif\ifqthesis@hasacronyms
 \qthesis@hasacronymsfalse
 \pretocmd{\newacronym}{\global\qthesis@hasacronymstrue}{}{}
@@ -268,7 +268,10 @@
 % \renewcommand{\qthesisacronymfile}{yourfile.tex} in the preamble.
 \newcommand{\qthesisacronymfile}{acronyms.tex}
 \IfFileExists{\qthesisacronymfile}{\input{\qthesisacronymfile}}{}
-\AtBeginDocument{\glsaddall}% Include all defined acronyms in the list
+\ifqthesis@hasacronyms
+  \makeglossaries
+  \AtBeginDocument{\glsaddall}% Include all defined acronyms in the list
+\fi
 
 % Redirect bare \cite to \citep and emit a warning, so authors use \citep
 % (parenthetical) or \citet (narrative) explicitly.
@@ -1222,8 +1225,14 @@
     \cleardoublepage
   \fi
   \ifqthesis@hasacronyms
-    \printglossary[type=\acronymtype]
-    \cleardoublepage
+    % Only print if the acronym index file exists in the current directory.
+    % This avoids accidentally picking up an unrelated \jobname.acr from TeX search paths.
+    \IfFileExists{./\jobname.acr}{%
+      \printglossary[type=\acronymtype]%
+      \cleardoublepage
+    }{%
+      \PackageWarning{qthesis}{Acronyms defined but ./\jobname.acr missing. Run makeglossaries (or make) to build the List of Acronyms. Skipping list.}%
+    }%
   \fi
 }
 

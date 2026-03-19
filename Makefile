@@ -56,6 +56,7 @@ else
 endif
 
 LATEXMK = latexmk
+LATEXMK_OPTS ?= -f
 
 .PHONY: clean distclean wordcount check help hacker-font reports
 
@@ -123,9 +124,9 @@ hacker-font:
 
 $(MAIN).pdf: $(MAIN).tex qthesis.cls bibliography.bib acronyms.tex \
 	C*/chapter*.tex A*/appendix*.tex
-	$(LATEXMK) $(LATEXMK_ENGINE) $(LATEXMK_CMD) $(MAIN)
+	$(LATEXMK) $(LATEXMK_OPTS) $(LATEXMK_ENGINE) $(LATEXMK_CMD) $(MAIN)
 	-makeglossaries $(MAIN)
-	$(LATEXMK) $(LATEXMK_ENGINE) $(LATEXMK_CMD) $(MAIN)
+	$(LATEXMK) $(LATEXMK_OPTS) -g $(LATEXMK_ENGINE) $(LATEXMK_CMD) $(MAIN)
 
 # ------------------------------------------------------------------------------
 # Progress reports (qreport-based, single-file documents)
@@ -134,7 +135,7 @@ $(MAIN).pdf: $(MAIN).tex qthesis.cls bibliography.bib acronyms.tex \
 # Pattern rule: build any <name>.pdf from <name>.tex using latexmk.
 # This is suitable for qreport-based documents such as progress reports.
 %.pdf: %.tex qreport.cls
-	$(LATEXMK) $(LATEXMK_ENGINE) $(LATEXMK_CMD) $*
+	$(LATEXMK) $(LATEXMK_OPTS) $(LATEXMK_ENGINE) $(LATEXMK_CMD) $*
 
 # Build all configured reports: REPORTS = progress-report [more names ...]
 reports: $(REPORTS:%=%.pdf)

@@ -451,7 +451,7 @@
 }
 
 \renewenvironment{abstract}{%
-  \par\noindent
+  \par\vspace*{-\parskip}\vspace*{-\baselineskip}\noindent%
   \small
   \quotation
   \noindent\rule{\linewidth}{0.4pt}\par\vspace{0.1ex}\noindent%
@@ -518,9 +518,8 @@
 
 \def\@maketitle{%
   \begin{center}%
-    \vspace*{1.5ex}%
     {\LARGE\bfseries \qreport@title\par}%
-    \vspace{1.5ex}%
+    \vspace{0.5ex}%
     {\large
       \lineskip .5em
       \ifx\qreport@candidate\@empty
@@ -528,7 +527,7 @@
         \qreport@candidate\par
       \fi
     }%
-    \vspace{0.75ex}%
+    \vspace{0.5ex}%
     {\normalsize
       \ifx\qreport@programme\@empty\else \qreport@programme\par\fi
       \ifx\qreport@school\@empty
@@ -542,7 +541,7 @@
       \ifx\qreport@reportperiod\@empty\else Reporting period: \qreport@reportperiod\par\fi
       \qreport@date\par
     }%
-    \vspace{1.5ex}%
+    \vspace{0.5ex}%
   \end{center}%
 }
 
